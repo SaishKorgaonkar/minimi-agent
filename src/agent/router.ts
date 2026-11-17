@@ -4,6 +4,7 @@ import { config } from '../config.js';
 import { models, withOptionsFallback } from '../llm.js';
 import type { Turn } from '../db/repo.js';
 import type { DateRange } from '../time/resolve.js';
+import { prompt } from '../prompts.js';
 import { formatDateTime } from '../time/tz.js';
 import { truncate, within } from '../util.js';
 
@@ -29,14 +30,17 @@ export const routeSchema = z.object({
 
 export type Route = z.infer<typeof routeSchema> & { source: 'model' | 'fallback' };
 
-export async function route(input: { message: string; recent: Turn[]; range: DateRange | null; now: Date; tz: string }): Promise<Route> {
+export async function route(
+  input: { message: string; recent: Turn[]; range: DateRange | null; now: Date; tz: string },
+  instructions = prompt('router'),
+): Promise<Route> {
   const history = input.recent.slice(-4).map((t) => `${t.role.toUpperCase()}: ${truncate(t.content, 400)}`).join('\n');
   const call = withOptionsFallback('router', (providerOptions) =>
     generateText({
       model: models.router(),
       providerOptions,
       output: Output.object({ schema: routeSchema }),
-      instructions: 'You route messages for a chat assistant that has web search and memory of past conversations. Reply with the routing decision only.',
+      instructions,
       prompt:
         `Now: ${formatDateTime(input.now, input.tz)} (${input.tz})\n` +
         (input.range ? `The message refers to: ${input.range.label} ("${input.range.text}")\n` : '') +

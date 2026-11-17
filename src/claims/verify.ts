@@ -10,6 +10,7 @@ import { log } from '../log.js';
 import { bestPassages, fetchPage } from '../search/fetch.js';
 import { formatEvidence, webSearch, type SourceRegistry } from '../search/index.js';
 import type { Evidence } from '../search/types.js';
+import { prompt } from '../prompts.js';
 import { isoDay } from '../time/tz.js';
 
 /**
@@ -183,31 +184,52 @@ function dedupe(evidence: Evidence[]): Evidence[] {
   return evidence.filter((e) => !seen.has(e.n) && seen.add(e.n));
 }
 
-/** One structured call decides every entity's open claims and notable news. */
-async function judge(groups: Gathered[], since: Date, registry: SourceRegistry, checkedAt: number, tz: string) {
-  const open = groups.map((g, i) => ({ g, i })).filter(({ g }) => g.evidence.length);
-  if (!open.length) return;
-  const sections = open.map(({ g, i }) => {
-    const list = g.needJudge.map((r, k) =>
-      `${k}. ${r.claim.attribute}: "${r.claim.value}" (stated ${isoDay(new Date(r.claim.checked_at), tz)}${r.claim.source_url ? `, source ${r.claim.source_url}` : ''})`).join('\n');
+/** What the judge sees for one entity. */
+export interface JudgeItem {
+  entity: string;
+  claims: Pick<Claim, 'entity' | 'attribute' | 'value' | 'checked_at' | 'source_url'>[];
+  evidence: Evidence[];
+}
+
+export type JudgeOutput = z.infer<typeof judgeSchema>;
+
+/**
+ * The judge call itself, shared by production and `npm run optimize`.
+ * Entities are numbered by their position in `items`.
+ */
+export async function judgeClaims(
+  items: JudgeItem[], since: Date, today: Date, tz: string, instructions = prompt('judge'),
+): Promise<JudgeOutput | undefined> {
+  const sections = items.map((g, i) => {
+    const list = g.claims.map((c, k) =>
+      // Each claim keeps its own product name: grouped under "Pipedrive", a bare
+      // "price per seat: $39" (Growth) would be compared with Lite's $14.
+      `${k}. ${c.entity}, ${c.attribute}: "${c.value}" (stated ${isoDay(new Date(c.checked_at), tz)}${c.source_url ? `, source ${c.source_url}` : ''})`).join('\n');
     return `## ${i}. Entity: ${g.entity}\nEARLIER CLAIMS:\n${list || '(none to judge; only report news)'}\n\nEVIDENCE:\n${formatEvidence(g.evidence)}`;
   });
+  const { output } = await withOptionsFallback('judge', (providerOptions) =>
+    generateText({
+      model: models.judge(),
+      providerOptions,
+      output: Output.object({ schema: judgeSchema }),
+      instructions,
+      prompt: `Since: ${isoDay(since, tz)}\nToday: ${isoDay(today, tz)}\n\n${sections.join('\n\n')}`,
+    }),
+  );
+  return output;
+}
+
+/** One structured call decides every entity's open claims and notable news. */
+async function judge(groups: Gathered[], since: Date, registry: SourceRegistry, checkedAt: number, tz: string) {
+  const open = groups.filter((g) => g.evidence.length);
+  if (!open.length) return;
   try {
-    const { output } = await withOptionsFallback('judge', (providerOptions) =>
-      generateText({
-        model: models.judge(),
-        providerOptions,
-        output: Output.object({ schema: judgeSchema }),
-        instructions:
-          'You check whether earlier statements about products are still true, using only the evidence listed under each entity. ' +
-          'Be conservative: mark "changed" only when the evidence clearly shows a different current value, ' +
-          '"unchanged" only when it clearly shows the same one, otherwise "unverified". Never use outside knowledge. ' +
-          'Return one entry per entity, using its number from the ## heading.',
-        prompt: `Since: ${isoDay(since, tz)}\nToday: ${isoDay(new Date(checkedAt), tz)}\n\n${sections.join('\n\n')}`,
-      }),
+    const output = await judgeClaims(
+      open.map((g) => ({ entity: g.entity, claims: g.needJudge.map((r) => r.claim), evidence: g.evidence })),
+      since, new Date(checkedAt), tz,
     );
     for (const e of output?.entities ?? []) {
-      const g = groups[e.entity];
+      const g = open[e.entity];
       if (!g) continue;
       for (const v of e.claims) {
         const r = g.needJudge[v.index];

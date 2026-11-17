@@ -46,6 +46,7 @@ Each answer links to a **trace** page showing the route chosen, the searches run
 | `npm test` | Offline tests (mock models, fake search): date resolution, the full recall → verify flow, durable job queue |
 | `npm run eval` | End-to-end eval on real models: LongMemEval's five memory abilities + re-verification + latency |
 | `npm run eval:search` | Search provider freshness comparison (`-- --judge` adds relevance scoring) |
+| `npm run optimize -- judge` | GEPA-style prompt optimisation on the verification judge (see `scripts/optimize/`) |
 | `npm run typecheck` | TypeScript |
 
 ## Layout
@@ -63,6 +64,7 @@ src/
   jobs/                durable job queue + background handlers
   db/                  SQLite schema and the storage interface
 public/                chat UI (no build step) and trace viewer
-scripts/               seed, evals
+prompts/               tuned model instructions (router, judge)
+scripts/               seed, evals, prompt optimisation
 test/                  offline tests
 ```

@@ -44,9 +44,9 @@ save question ─► resolve dates (code) ─► route ‖ recall ─► gather 
 | Fast router, strong answerer | Routing runs every turn; quality matters where the user reads |
 | Vercel AI SDK, traces at `/debug/turn/:id` | Provider swap is one file; every answer shows its route, searches and timings |
 
-**Rejected:** OpenAI's built-in search (hides retrieval, where quality comes from). Postgres/PGlite (a server, or a young
-embed). A vector database (cosine inside a date filter is enough for one person). A memory tool (extra round trip, may not be
-called). Whole history in context (LongMemEval: long context isn't memory). Inngest/Temporal (an extra dev server).
+**Rejected:** OpenAI's built-in search (hides retrieval). Postgres/PGlite (a server to run). A vector database (cosine inside a
+date filter is enough for one person). A memory tool (an extra round trip). Whole history in context (long context isn't memory).
+Inngest/Temporal (an extra dev server).
 
 ## Measured (real models and search, 17 Nov 2026)
 
@@ -72,11 +72,18 @@ LLM judge. **9/9 pass. First word p50 3.7 s.**
 - Exa `lite` rejects `maxAgeHours`, so freshness comes from re-fetching the page. "Tue, 3 Nov" resolved to last Tuesday;
   an explicit date now wins.
 
+**Prompt optimisation** (`scripts/optimize/`, after [GEPA](https://github.com/gepa-ai/gepa)). The router scored 47/48 on a labelled set
+before any tuning; its misses are API latency, not wording, so it was left alone. For the judge, 23 cases with known answers were built from real
+claims and page snapshots, split by vendor into train/val/test. Two optimisers got the same scorer, models and budget (120 evaluations): a GEPA-style loop in
+TypeScript (`npm run optimize`), and real GEPA through a Python bridge that scores every candidate with the same TypeScript rollout. Both kept
+the original as best on validation. GEPA's strongest rewrite had good general rules but memorised training cases (1.0 on train, 0.90 overall).
+Keeping only its general rules gave **0.95 vs 0.88** over 4 runs on all 23 cases (test 0.97 vs 0.86) with no false "changed"; that is `prompts/judge.md`.
+Building the labels also exposed a real bug: claims grouped by vendor had lost their plan names ("Pipedrive Growth" vs "Lite").
+
 **Known gaps:** a re-check recalls only that day, so a later update ("the team is now 35") isn't weighed. Pages that render
 prices with JavaScript come back "couldn't verify".
 
 ## With another week
 
-Re-check schedules per claim type (prices weekly, versions monthly) with Mac notifications. One Cloudflare Durable Object per
-user (its own SQLite, scheduling and WebSockets; the design maps one-to-one). Headless fetch for JavaScript pricing pages.
-Structured snapshot diffs, so "what changed" needs no LLM. A larger eval set from real usage, with provider and model A/B runs.
+Re-checks scheduled per claim type, with Mac notifications. One Durable Object per user (the design maps one-to-one).
+Headless fetch for JavaScript pricing pages. Larger, human-checked eval sets from real usage, so the optimiser can tune the answer prompt too.

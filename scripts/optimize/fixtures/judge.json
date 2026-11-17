@@ -1,0 +1,1106 @@
+[
+ {
+  "id": "node.js-0",
+  "vendor": "node.js",
+  "entity": "Node.js",
+  "claims": [
+   {
+    "entity": "Node.js",
+    "attribute": "Security releases",
+    "value": "security updates for 26.x, 24.x, and 22.x on 11 November",
+    "checked_at": 1794920339219,
+    "source_url": "https://nodejs.org/en/blog/vulnerability/november-2026-security-releases"
+   },
+   {
+    "entity": "Node.js 26.13.0 \u201cLithium\u201d",
+    "attribute": "Active LTS end date",
+    "value": "24 October 2027",
+    "checked_at": 1793684107239,
+    "source_url": "https://github.com/nodejs/release?tab=readme-ov-file"
+   },
+   {
+    "entity": "Node.js",
+    "attribute": "Latest LTS version as of 17 November 2026",
+    "value": "26.13.1 \u201cLithium\u201d",
+    "checked_at": 1794920339219,
+    "source_url": "https://thestacksentinel.com/nodejs/releases/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "security updates for 26.x, 24.x, and 22.x on 11 November"
+   },
+   {
+    "status": "unchanged",
+    "value": "20 October 2027"
+   },
+   {
+    "status": "unverified",
+    "value": "26.13.1 \u201cLithium\u201d"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://nodejs.org/en/blog/vulnerability/november-2026-security-releases",
+    "title": "Node.js \u2014 Wednesday, November 11, 2026 Security Releases",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Skip to content\nCommercial support for versions past the Maintenance LTS phase is available through our OpenJS Ecosystem Sustainability Program partners\nWednesday, November 11, 2026 Security Releases\nTNJP\nThe Node.js Project\nWednesday, November 11, 2026 Security Releases\nSecurity releases available\nUpdates are now available for the 26.x, 24.x, 22.x Node.js release lines for the\nfollowing issues.\nPatched vulnerabilities\nThis security release includes the following dependency updates to address public vulnerabilities:\nllhttp on 22.x, 24.x, 26.x\nundici on 24.x, 26.x\nsqlite on 22.x, 24.x",
+     "The highest severity issue fixed in the 24.x release line is HIGH.\nThe highest severity issue fixed in the 22.x release line is HIGH.\nIt's important to note that End-of-Life versions are always affected when a security release occurs.\nTo ensure your system's security, please use an up-to-date version as outlined in our\nRelease Schedule .\nRelease timing\nReleases will be available on, or shortly after, Wednesday, November 11, 2026.\nContact and future updates\nThe current Node.js security policy can be found at https://nodejs.org/en/security/ ."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   },
+   {
+    "n": 2,
+    "url": "https://github.com/nodejs/release?tab=readme-ov-file",
+    "title": "GitHub - nodejs/Release: Node.js Release Working Group \u00b7 GitHub",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "| 2027-10-20\n| 2029-04-30\n| Release\n| Status\n| Codename\n| Alpha Start\n| Current Start\n| LTS Start\n| End-of-life\n| 27.x\n| Alpha\n| 2026-10-28\n| 2027-04-22\n| 2027-10-20\n| 2030-04-30\nDates are subject to change.\nThe Release schedule is available also as a JSON file.\nRelease Phases\nThere are four phases that a Node.js release can be in: 'Alpha', 'Current',\n'Active Long Term Support (LTS)', and 'Maintenance'. Starting with Node.js 27,\nevery release line goes through the 'Alpha' phase before its first 'Current'\nrelease, and every release line is promoted to LTS. Those release lines stay in"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "node.js-1",
+  "vendor": "node.js",
+  "entity": "Node.js",
+  "claims": [
+   {
+    "entity": "Node.js",
+    "attribute": "Security releases",
+    "value": "security updates for 31.x, 24.x, and 22.x on 11 November",
+    "checked_at": 1794920339219,
+    "source_url": "https://nodejs.org/en/blog/vulnerability/november-2026-security-releases"
+   },
+   {
+    "entity": "Node.js 26.13.0 \u201cLithium\u201d",
+    "attribute": "Active LTS end date",
+    "value": "20 October 2027",
+    "checked_at": 1793684107239,
+    "source_url": "https://github.com/nodejs/release?tab=readme-ov-file"
+   },
+   {
+    "entity": "Node.js",
+    "attribute": "Latest LTS version as of 17 November 2026",
+    "value": "26.13.1 \u201cLithium\u201d",
+    "checked_at": 1794920339219,
+    "source_url": "https://thestacksentinel.com/nodejs/releases/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "security updates for 26.x, 24.x, and 22.x on 11 November"
+   },
+   {
+    "status": "unverified",
+    "value": "20 October 2027"
+   },
+   {
+    "status": "unchanged",
+    "value": "26.13.1 \u201cLithium\u201d"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://nodejs.org/en/blog/vulnerability/november-2026-security-releases",
+    "title": "Node.js \u2014 Wednesday, November 11, 2026 Security Releases",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Skip to content\nCommercial support for versions past the Maintenance LTS phase is available through our OpenJS Ecosystem Sustainability Program partners\nWednesday, November 11, 2026 Security Releases\nTNJP\nThe Node.js Project\nWednesday, November 11, 2026 Security Releases\nSecurity releases available\nUpdates are now available for the 26.x, 24.x, 22.x Node.js release lines for the\nfollowing issues.\nPatched vulnerabilities\nThis security release includes the following dependency updates to address public vulnerabilities:\nllhttp on 22.x, 24.x, 26.x\nundici on 24.x, 26.x\nsqlite on 22.x, 24.x",
+     "The highest severity issue fixed in the 24.x release line is HIGH.\nThe highest severity issue fixed in the 22.x release line is HIGH.\nIt's important to note that End-of-Life versions are always affected when a security release occurs.\nTo ensure your system's security, please use an up-to-date version as outlined in our\nRelease Schedule .\nRelease timing\nReleases will be available on, or shortly after, Wednesday, November 11, 2026.\nContact and future updates\nThe current Node.js security policy can be found at https://nodejs.org/en/security/ ."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   },
+   {
+    "n": 2,
+    "url": "https://thestacksentinel.com/nodejs/releases/",
+    "title": "Node.js Versions and Release Dates by Release Line",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Latest Node.js versions: 26.13.1 (Node.js 26, Active LTS, November 10, 2026), 24.22.3 (Node.js 24, Maintenance LTS, November 10, 2026) and 22.23.5 (Node.js 22, Maintenance LTS, November 11, 2026). The newest LTS line is Node.js 26 (Lithium). This page lists all 147 releases of the release lines below, newest first, with the date each one shipped, whether it was an LTS or Current release, whether nodejs.org marks it as a security release, and the npm version it bundles. For the CVEs behind each security release, see Node.js security releases .\nNode.js 26 (Lithium) Releases",
+     "Active LTS; end of life on April 30, 2029. Latest release 26.13.1 on November 10, 2026; latest security release 26.13.1 on November 10, 2026. 21 releases.\nEvery Node.js 26 (Lithium) release, newest first | | Version | Release date | Type | Security release | npm\n| 26.13.1 \u00b7 our analysis | November 10, 2026 | LTS | Yes, CVEs | 11.20.0\n| 26.13.0 | October 28, 2026 | LTS | No | 11.20.0\n| 26.12.1 \u00b7 our analysis | October 21, 2026 | Current | Yes, CVEs | 11.20.0\n| 26.12.0 \u00b7 our analysis | October 14, 2026 | Current | No | 11.20.0\n| 26.11.1 | October 7, 2026 | Current | No | 11.20.0"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hubspot-0",
+  "vendor": "hubspot",
+  "entity": "HubSpot Sales Hub",
+  "claims": [
+   {
+    "entity": "HubSpot Sales Hub Starter",
+    "attribute": "Price",
+    "value": "$20/seat/month with monthly billing",
+    "checked_at": 1794920311594,
+    "source_url": "https://www.sybill.ai/blogs/hubspot-sales-hub-pricing"
+   },
+   {
+    "entity": "HubSpot Sales Hub Professional",
+    "attribute": "Price per seat",
+    "value": "roughly $108\u2013$100/seat, plus onboarding",
+    "checked_at": 1794805233547,
+    "source_url": "https://www.sybill.ai/blogs/hubspot-sales-hub-pricing"
+   },
+   {
+    "entity": "HubSpot Sales Hub Starter",
+    "attribute": "Monthly billing price per seat per month",
+    "value": "$20",
+    "checked_at": 1794805233547,
+    "source_url": "https://saaspricealerts.com/guides/crm-pricing-comparison/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unverified",
+    "value": "$20/seat/month with monthly billing"
+   },
+   {
+    "status": "unverified",
+    "value": "roughly $90\u2013$100/seat, plus onboarding"
+   },
+   {
+    "status": "unverified",
+    "value": "$20"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.sybill.ai/blogs/hubspot-sales-hub-pricing",
+    "title": "HubSpot Sales Hub Pricing 2026: Starter vs Professional vs Enterprise Compared",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "HubSpot Sales Hub pricing is genuinely simple on the surface: per-seat tiers at $15, roughly $100, and $150, plus a famously capable free CRM underneath. The complexity lives one layer down, in what each tier actually gates, the seat types introduced with the 2024 pricing model, the mandatory onboarding fees, and the credits quietly metering the newer AI features. This guide prices all of it honestly (figures checked against HubSpot's own published guidance and current 2026 breakdowns; confirm against the live pricing page before signing, since promotional rates come and go), then answers the question the pricing page can't: when each upgrade actually pays."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hubspot-1",
+  "vendor": "hubspot",
+  "entity": "HubSpot Sales Hub",
+  "claims": [
+   {
+    "entity": "HubSpot Sales Hub Starter",
+    "attribute": "Price",
+    "value": "$24/seat/month with monthly billing",
+    "checked_at": 1794920311594,
+    "source_url": "https://www.sybill.ai/blogs/hubspot-sales-hub-pricing"
+   },
+   {
+    "entity": "HubSpot Sales Hub Professional",
+    "attribute": "Price per seat",
+    "value": "roughly $90\u2013$100/seat, plus onboarding",
+    "checked_at": 1794805233547,
+    "source_url": "https://www.sybill.ai/blogs/hubspot-sales-hub-pricing"
+   },
+   {
+    "entity": "HubSpot Sales Hub Starter",
+    "attribute": "Monthly billing price per seat per month",
+    "value": "$20",
+    "checked_at": 1794805233547,
+    "source_url": "https://saaspricealerts.com/guides/crm-pricing-comparison/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "$20/seat/month with monthly billing"
+   },
+   {
+    "status": "unverified",
+    "value": "roughly $90\u2013$100/seat, plus onboarding"
+   },
+   {
+    "status": "unchanged",
+    "value": "$20"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://saaspricealerts.com/guides/crm-pricing-comparison/",
+    "title": "CRM pricing comparison: 12 CRMs per user and for a team of 5 (2026)",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "The cheapest paid plan each vendor lists, per user per month. \"Annual\" means the price shown with annual billing.\n| CRM\n| Entry paid plan\n| Price per user\n| Billing\n| Free plan?\n| Freshsales\n| Growth\n| $9\n| annual\n| no\n| Close\n| Solo (1 user)\n| $9\n| annual\n| no\n| monday CRM\n| CRM Basic\n| $12 a seat\n| annual\n| no\n| Zoho CRM\n| Standard\n| $14 ($20 monthly)\n| annual\n| yes, 3 users\n| Pipedrive\n| Lite\n| $14\n| annual\n| no, 14-day trial\n| Capsule\n| Starter\n| $18\n| annual\n| yes, 2 users\n| HubSpot\n| Starter\n| $20 a seat\n| monthly\n| yes, 2 users\n| Copper\n| Basic\n| $23 ($29 monthly)\n| annual\n| no",
+     "HubSpot: Free, then Starter at $20 a seat on monthly billing. Professional starts at $800 a month and carries a one-time onboarding fee of $3,000. Enterprise starts at $3,600 a month with a $7,000 onboarding fee. These figures come from the main HubSpot pricing page view we track.\nWhat the per-user price leaves out\nSeat caps on cheap plans. Close Solo is 1 user. Free plans at HubSpot and Capsule stop at 2 users. Zoho's free plan stops at 3. Attio Free is up to 3 seats."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "render-0",
+  "vendor": "render",
+  "entity": "Render Postgres",
+  "claims": [
+   {
+    "entity": "Render Postgres",
+    "attribute": "256 MB RAM pricing",
+    "value": "$6/month + $0.30/GB-month storage",
+    "checked_at": 1794920365438,
+    "source_url": "https://render.com/pricing"
+   },
+   {
+    "entity": "Render Postgres",
+    "attribute": "Monthly starting cost for 0.1 CPU / 256 MB",
+    "value": "$7/month + $0.30/GB-month storage",
+    "checked_at": 1794306636972,
+    "source_url": "https://render.com/pricing"
+   },
+   {
+    "entity": "Render Postgres",
+    "attribute": "Cheapest paid price",
+    "value": "$6/month + storage",
+    "checked_at": 1794306627015,
+    "source_url": "https://render.com/pricing"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unverified",
+    "value": "$6/month + $0.30/GB-month storage"
+   },
+   {
+    "status": "unverified",
+    "value": "$6/month + $0.30/GB-month storage"
+   },
+   {
+    "status": "unverified",
+    "value": "$6/month + storage"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://render.com/pricing",
+    "title": "Pricing | Render",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Background workers\nPersistent disks\n$0.25 per GB per month\nPostgres databases\nExpandable storage\n$0.30 per GB\nPoint-in-time recovery window\n3 days\nRead-only replicas\nHigh availability\nKey-value (Redis-compatible)\nCron jobs\nWorkflows\nParallel task compute\n10,000 CPU\n40,000 GB RAM\nNew task compute per minute\n16 CPU\n64 GB RAM\nSandboxes\nDefault concurrent sandboxes\n100\nMaximum session length\nNo limit\nSnapshot storage\n$0.08 per GB per month\nService scaling\nVertical scaling\nHorizontal autoscaling\nNetworking\nAutomatic private networking\nBandwidth\n5 GB included per month\nthen $0.15 per GB"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aws-0",
+  "vendor": "aws",
+  "entity": "AWS",
+  "claims": [
+   {
+    "entity": "AWS RDS PostgreSQL",
+    "attribute": "Monthly starting cost for db.t4g.micro, Single-AZ, 20 GB gp3 in US East (N. Virginia)",
+    "value": "About $13.98/month: $11.68 compute + $2.30 storage",
+    "checked_at": 1794306636972,
+    "source_url": "https://ownkube.io/compare/aws-rds-pricing-explained"
+   },
+   {
+    "entity": "AWS",
+    "attribute": "RDS Graviton5-based R9g instances announcement",
+    "value": "14 November",
+    "checked_at": 1794920365438,
+    "source_url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-aurora-rds-postgresql-mysql-mariadb-r9g-instances/"
+   },
+   {
+    "entity": "AWS RDS PostgreSQL",
+    "attribute": "R9g instance launch",
+    "value": "12 November",
+    "checked_at": 1794921830711,
+    "source_url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-aurora-rds-postgresql-mysql-mariadb-r9g-instances/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "About $13.98/month: $11.68 compute + $2.30 storage"
+   },
+   {
+    "status": "unverified",
+    "value": "12 November"
+   },
+   {
+    "status": "unverified",
+    "value": "12 November"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://ownkube.io/compare/aws-rds-pricing-explained",
+    "title": "AWS RDS pricing explained: instances, storage, Multi-AZ and real Postgres bills - Ownkube",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "db.t4g.micro , Single-AZ, 20 GB of gp3, private to the VPC.\n| | Line | Monthly\n| Instance | $11.68\n| Storage (20 GB at $0.115) | $2.30\n| Backups (inside the free allowance) | $0\n| Total | $13.98\nMake it publicly accessible and add $3.65 for the IPv4 address.\nA small production database\ndb.t4g.medium , Multi-AZ, 50 GB of gp3.\n| | Line | Monthly\n| Instance (Multi-AZ) | $94.17\n| Storage (50 GB at $0.23) | $11.50\n| Backups (inside the free allowance) | $0\n| Total | $105.67\nA busier app\ndb.m7g.large , Multi-AZ, 200 GB of gp3, plus one read replica on the same class.\n| | Line | Monthly"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aws-1",
+  "vendor": "aws",
+  "entity": "AWS",
+  "claims": [
+   {
+    "entity": "AWS RDS PostgreSQL",
+    "attribute": "Monthly starting cost for db.t4g.micro, Single-AZ, 20 GB gp3 in US East (N. Virginia)",
+    "value": "About $14.01/month: $11.68 compute + $2.30 storage",
+    "checked_at": 1794306636972,
+    "source_url": "https://ownkube.io/compare/aws-rds-pricing-explained"
+   },
+   {
+    "entity": "AWS",
+    "attribute": "RDS Graviton5-based R9g instances announcement",
+    "value": "12 November",
+    "checked_at": 1794920365438,
+    "source_url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-aurora-rds-postgresql-mysql-mariadb-r9g-instances/"
+   },
+   {
+    "entity": "AWS RDS PostgreSQL",
+    "attribute": "R9g instance launch",
+    "value": "12 November",
+    "checked_at": 1794921830711,
+    "source_url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-aurora-rds-postgresql-mysql-mariadb-r9g-instances/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "About $13.98/month: $11.68 compute + $2.30 storage"
+   },
+   {
+    "status": "unverified",
+    "value": "12 November"
+   },
+   {
+    "status": "unverified",
+    "value": "12 November"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://ownkube.io/compare/aws-rds-pricing-explained",
+    "title": "AWS RDS pricing explained: instances, storage, Multi-AZ and real Postgres bills - Ownkube",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "db.t4g.micro , Single-AZ, 20 GB of gp3, private to the VPC.\n| | Line | Monthly\n| Instance | $11.68\n| Storage (20 GB at $0.115) | $2.30\n| Backups (inside the free allowance) | $0\n| Total | $13.98\nMake it publicly accessible and add $3.65 for the IPv4 address.\nA small production database\ndb.t4g.medium , Multi-AZ, 50 GB of gp3.\n| | Line | Monthly\n| Instance (Multi-AZ) | $94.17\n| Storage (50 GB at $0.23) | $11.50\n| Backups (inside the free allowance) | $0\n| Total | $105.67\nA busier app\ndb.m7g.large , Multi-AZ, 200 GB of gp3, plus one read replica on the same class.\n| | Line | Monthly"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bizkonnect-0",
+  "vendor": "bizkonnect",
+  "entity": "BizKonnect",
+  "claims": [
+   {
+    "entity": "BizKonnect",
+    "attribute": "Zoho Marketplace integration launch",
+    "value": "launched an account-mapping integration on Zoho Marketplace today, 17 Nov",
+    "checked_at": 1794919641151,
+    "source_url": "http://www.forpressrelease.com/forpressrelease/593839/4/bizkonnect-account-maps-now-integrate-with-zoho-crm-and-are-available-on-the-zoho-marketplace"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "launched an account-mapping integration on Zoho Marketplace today, 17 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "http://www.forpressrelease.com/forpressrelease/593839/4/bizkonnect-account-maps-now-integrate-with-zoho-crm-and-are-available-on-the-zoho-marketplace",
+    "title": "bizkonnect account maps now integrate with zoho crm and are",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "SunTec India Director Rohit Bhateja Shares Why Authority, Not AI Tools, Sets Brands Apart in GoodFirms\u2019 Content Engagement 2026 Research\nPark Pebbles Bhugaon Brings Modern 2 & 3 BHK Living with Premium Lifestyle Amenities to Pune\nNovotel Mumbai Juhu Beach Kicks Off the Festive Season with Its Annual Cake Mixing Ceremony\nHome\nBusiness\nMail to a Friend\n| Rate\n&times;\nAdd To My Favorites\nare you sure you want to add this.\nAdd to Favorites\nBizKonnect Account Maps now integrate with Zoho CRM and are available on the Zoho Marketplace\n2026-11-17 08:09:56\nBusiness\n1743"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bizkonnect-1",
+  "vendor": "bizkonnect",
+  "entity": "BizKonnect",
+  "claims": [
+   {
+    "entity": "BizKonnect",
+    "attribute": "Zoho Marketplace integration launch",
+    "value": "launched an account-mapping integration on Zoho Marketplace today, 20 Nov",
+    "checked_at": 1794919641151,
+    "source_url": "http://www.forpressrelease.com/forpressrelease/593839/4/bizkonnect-account-maps-now-integrate-with-zoho-crm-and-are-available-on-the-zoho-marketplace"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "launched an account-mapping integration on Zoho Marketplace today, 17 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "http://www.forpressrelease.com/forpressrelease/593839/4/bizkonnect-account-maps-now-integrate-with-zoho-crm-and-are-available-on-the-zoho-marketplace",
+    "title": "bizkonnect account maps now integrate with zoho crm and are",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "SunTec India Director Rohit Bhateja Shares Why Authority, Not AI Tools, Sets Brands Apart in GoodFirms\u2019 Content Engagement 2026 Research\nPark Pebbles Bhugaon Brings Modern 2 & 3 BHK Living with Premium Lifestyle Amenities to Pune\nNovotel Mumbai Juhu Beach Kicks Off the Festive Season with Its Annual Cake Mixing Ceremony\nHome\nBusiness\nMail to a Friend\n| Rate\n&times;\nAdd To My Favorites\nare you sure you want to add this.\nAdd to Favorites\nBizKonnect Account Maps now integrate with Zoho CRM and are available on the Zoho Marketplace\n2026-11-17 08:09:56\nBusiness\n1743"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pipedrive-0",
+  "vendor": "pipedrive",
+  "entity": "Pipedrive",
+  "claims": [
+   {
+    "entity": "Pipedrive Lite",
+    "attribute": "Annual billing price per seat per month",
+    "value": "$14",
+    "checked_at": 1794805233547,
+    "source_url": "https://saaspricealerts.com/guides/crm-pricing-comparison/"
+   },
+   {
+    "entity": "Pipedrive Growth",
+    "attribute": "Annual billing price per seat",
+    "value": "$47/seat annual price",
+    "checked_at": 1794805233547,
+    "source_url": "https://hackceleration.com/labs/best/crm-sales-teams"
+   },
+   {
+    "entity": "Pipedrive Growth",
+    "attribute": "Per-seat price",
+    "value": "$39 per seat/month, billed annually",
+    "checked_at": 1794805219782,
+    "source_url": "https://appstackinsider.com/insights/pipedrive-pricing-explained/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "$14"
+   },
+   {
+    "status": "unverified",
+    "value": "$39/seat annual price"
+   },
+   {
+    "status": "unverified",
+    "value": "$39 per seat/month, billed annually"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://saaspricealerts.com/guides/crm-pricing-comparison/",
+    "title": "CRM pricing comparison: 12 CRMs per user and for a team of 5 (2026)",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "The cheapest paid plan each vendor lists, per user per month. \"Annual\" means the price shown with annual billing.\n| CRM\n| Entry paid plan\n| Price per user\n| Billing\n| Free plan?\n| Freshsales\n| Growth\n| $9\n| annual\n| no\n| Close\n| Solo (1 user)\n| $9\n| annual\n| no\n| monday CRM\n| CRM Basic\n| $12 a seat\n| annual\n| no\n| Zoho CRM\n| Standard\n| $14 ($20 monthly)\n| annual\n| yes, 3 users\n| Pipedrive\n| Lite\n| $14\n| annual\n| no, 14-day trial\n| Capsule\n| Starter\n| $18\n| annual\n| yes, 2 users\n| HubSpot\n| Starter\n| $20 a seat\n| monthly\n| yes, 2 users\n| Copper\n| Basic\n| $23 ($29 monthly)\n| annual\n| no"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pipedrive-1",
+  "vendor": "pipedrive",
+  "entity": "Pipedrive",
+  "claims": [
+   {
+    "entity": "Pipedrive Lite",
+    "attribute": "Annual billing price per seat per month",
+    "value": "$17",
+    "checked_at": 1794805233547,
+    "source_url": "https://saaspricealerts.com/guides/crm-pricing-comparison/"
+   },
+   {
+    "entity": "Pipedrive Growth",
+    "attribute": "Annual billing price per seat",
+    "value": "$39/seat annual price",
+    "checked_at": 1794805233547,
+    "source_url": "https://hackceleration.com/labs/best/crm-sales-teams"
+   },
+   {
+    "entity": "Pipedrive Growth",
+    "attribute": "Per-seat price",
+    "value": "$39 per seat/month, billed annually",
+    "checked_at": 1794805219782,
+    "source_url": "https://appstackinsider.com/insights/pipedrive-pricing-explained/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "$14"
+   },
+   {
+    "status": "unverified",
+    "value": "$39/seat annual price"
+   },
+   {
+    "status": "unverified",
+    "value": "$39 per seat/month, billed annually"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://saaspricealerts.com/guides/crm-pricing-comparison/",
+    "title": "CRM pricing comparison: 12 CRMs per user and for a team of 5 (2026)",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "The cheapest paid plan each vendor lists, per user per month. \"Annual\" means the price shown with annual billing.\n| CRM\n| Entry paid plan\n| Price per user\n| Billing\n| Free plan?\n| Freshsales\n| Growth\n| $9\n| annual\n| no\n| Close\n| Solo (1 user)\n| $9\n| annual\n| no\n| monday CRM\n| CRM Basic\n| $12 a seat\n| annual\n| no\n| Zoho CRM\n| Standard\n| $14 ($20 monthly)\n| annual\n| yes, 3 users\n| Pipedrive\n| Lite\n| $14\n| annual\n| no, 14-day trial\n| Capsule\n| Starter\n| $18\n| annual\n| yes, 2 users\n| HubSpot\n| Starter\n| $20 a seat\n| monthly\n| yes, 2 users\n| Copper\n| Basic\n| $23 ($29 monthly)\n| annual\n| no"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tencent-0",
+  "vendor": "tencent",
+  "entity": "Tencent Hy4 flash",
+  "claims": [
+   {
+    "entity": "Tencent Hy4 flash",
+    "attribute": "Announced standard pricing",
+    "value": "approximately $0.070/M input and $0.281/M output tokens",
+    "checked_at": 1794921894104,
+    "source_url": "https://www.prnewswire.com/news-releases/tencent-launches-hy4-flash-to-power-high-speed-cost-efficient-ai-deployment-for-everyday-workflows-302941875.html"
+   },
+   {
+    "entity": "Tencent Hy4 flash",
+    "attribute": "Parameters and context",
+    "value": "269B total parameters, 12B active, and up to 1M-token context",
+    "checked_at": 1794921894104,
+    "source_url": "https://www.prnewswire.com/news-releases/tencent-launches-hy4-flash-to-power-high-speed-cost-efficient-ai-deployment-for-everyday-workflows-302941875.html"
+   },
+   {
+    "entity": "Tencent Hy4 flash",
+    "attribute": "Announcement date",
+    "value": "17 Nov",
+    "checked_at": 1794921894104,
+    "source_url": "https://www.prnewswire.com/news-releases/tencent-launches-hy4-flash-to-power-high-speed-cost-efficient-ai-deployment-for-everyday-workflows-302941875.html"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unverified",
+    "value": "approximately $0.070/M input and $0.281/M output tokens"
+   },
+   {
+    "status": "unverified",
+    "value": "224B total parameters, 12B active, and up to 1M-token context"
+   },
+   {
+    "status": "unverified",
+    "value": "17 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.prnewswire.com/news-releases/tencent-launches-hy4-flash-to-power-high-speed-cost-efficient-ai-deployment-for-everyday-workflows-302941875.html",
+    "title": "Tencent Launches Hy4 flash to Power High-Speed, Cost-Efficient AI Deployment for Everyday Workflows",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "As a result, Hy4 flash slightly outperforms the larger Hy4 Preview (770 billion total parameters, 49 billion active parameters) in overall effectiveness, at a significantly lower cost. Based on the internal WorkIndex benchmark, which covers PowerPoint deck creation and editing, document editing, spreadsheet repair, audio/video processing, and visual understanding tasks typical of use with WorkBuddy \u2014 Hy4 flash delivers a per-task cost of just 1/13 that of Hy4 Preview, 1/20 that of Hy4 , and 1/8 that of DeepSeek-V4.1-Flash-1017 (Max tier, peak-hour pricing)."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "google-0",
+  "vendor": "google",
+  "entity": "Google Gemini 4 Hydrogen",
+  "claims": [
+   {
+    "entity": "Google Gemini 4 Hydrogen",
+    "attribute": "Pricing",
+    "value": "$1.50/M input tokens and $7.50/M output tokens, flat across the context window",
+    "checked_at": 1794921894104,
+    "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/"
+   },
+   {
+    "entity": "Google Gemini 4 Hydrogen",
+    "attribute": "Vendor-reported performance",
+    "value": "performance above Gemini 5 Argon on the Artificial Analysis Intelligence Index at default thinking settings",
+    "checked_at": 1794921894104,
+    "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/"
+   },
+   {
+    "entity": "Google Gemini 4 Hydrogen",
+    "attribute": "Announcement date",
+    "value": "12 Nov",
+    "checked_at": 1794921894104,
+    "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "$1.50/M input tokens and $7.50/M output tokens, flat across the context window"
+   },
+   {
+    "status": "changed",
+    "value": "performance above Gemini 4 Argon on the Artificial Analysis Intelligence Index at default thinking settings"
+   },
+   {
+    "status": "unverified",
+    "value": "12 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/",
+    "title": "Introducing Gemini 4 Hydrogen for Agentic Workflows",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Hydrogen surpasses Argon on the Artificial Analysis Intelligence Index at its default high thinking level (51 vs. 50, and reaching 54 at its highest xhigh thinking setting), while often completing tasks faster than models in its class. Gemini 4 Hydrogen is priced flat across its entire 1 million-token context window at $1.50 per million input tokens and $7.50 per million output tokens.\nUnlocking efficiencies in multi-model workloads",
+     "Today, we\u2019re introducing Gemini 4 Hydrogen, bringing cutting-edge intelligence to everyone \u2014 with speed and efficiency for everyday coding and agentic workflows.\nWhile our frontier models, Gemini 4 Carbon and Gemini 4 Argon , excel at deep, long-horizon reasoning on your hardest problems, Hydrogen is built for rapid execution across diverse agentic workflows. With Hydrogen, we\u2019re also bringing Gemini 4 to everyone \u2014 for all tiers of Google AI Studio , the Gemini API, Gemini for business , the Gemini app , Google Search , and paid Google AI Pro and Ultra subscribers in Google Antigravity ."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "nvidia-0",
+  "vendor": "nvidia",
+  "entity": "NVIDIA Nemotron for Science",
+  "claims": [
+   {
+    "entity": "NVIDIA Nemotron for Science",
+    "attribute": "Announcement and basis",
+    "value": "16 Nov; built on Nemotron 3.5 Super VL",
+    "checked_at": 1794921894104,
+    "source_url": "https://nvidianews.nvidia.com/news/nvidia-introduces-nemotron-for-science-to-accelerate-discoveries-with-agents"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "16 Nov; built on Nemotron 3.5 Super VL"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://nvidianews.nvidia.com/news/nvidia-introduces-nemotron-for-science-to-accelerate-discoveries-with-agents",
+    "title": "NVIDIA Introduces Nemotron for Science to Accelerate Discoveries With Agents | NVIDIA Newsroom",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "NVIDIA Introduces Nemotron for Science to Accelerate Discoveries With Agents\nNew Open Dataset and Post-Training Recipes Help Researchers Adapt Nemotron 3.5 Super VL for Life Sciences and Chemistry\nNovember 16, 2026\nNews Summary:\nNVIDIA Nemotron for Science brings together the Nemotron 3.5 Super VL model, scientific evaluations, a new open chemistry dataset and recipes to help researchers build domain-specific science agents.\nLitmusBench v0.2 supports both evaluation and post-training for chemistry reasoning, helping researchers assess model capabilities and adapt models to scientific tasks.",
+     "NVIDIA today introduced NVIDIA Nemotron for Science, bringing together scientific applications of its NVIDIA Nemotron&trade; 3.5 Super VL open model, a new open chemistry dataset and post-training recipes to help researchers build specialized agents for scientific discovery.\nBuilt on Nemotron 3.5 Super VL, Nemotron for Science helps researchers develop agents that reason through scientific problems and put specialized research tools to work. With post-training, scientists can adapt the model to specialized tasks such as conducting experiments for chemistry, protein design and more."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "nvidia-1",
+  "vendor": "nvidia",
+  "entity": "NVIDIA Nemotron for Science",
+  "claims": [
+   {
+    "entity": "NVIDIA Nemotron for Science",
+    "attribute": "Announcement and basis",
+    "value": "19 Nov; built on Nemotron 3.5 Super VL",
+    "checked_at": 1794921894104,
+    "source_url": "https://nvidianews.nvidia.com/news/nvidia-introduces-nemotron-for-science-to-accelerate-discoveries-with-agents"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "16 Nov; built on Nemotron 3.5 Super VL"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://nvidianews.nvidia.com/news/nvidia-introduces-nemotron-for-science-to-accelerate-discoveries-with-agents",
+    "title": "NVIDIA Introduces Nemotron for Science to Accelerate Discoveries With Agents | NVIDIA Newsroom",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "NVIDIA Introduces Nemotron for Science to Accelerate Discoveries With Agents\nNew Open Dataset and Post-Training Recipes Help Researchers Adapt Nemotron 3.5 Super VL for Life Sciences and Chemistry\nNovember 16, 2026\nNews Summary:\nNVIDIA Nemotron for Science brings together the Nemotron 3.5 Super VL model, scientific evaluations, a new open chemistry dataset and recipes to help researchers build domain-specific science agents.\nLitmusBench v0.2 supports both evaluation and post-training for chemistry reasoning, helping researchers assess model capabilities and adapt models to scientific tasks.",
+     "NVIDIA today introduced NVIDIA Nemotron for Science, bringing together scientific applications of its NVIDIA Nemotron&trade; 3.5 Super VL open model, a new open chemistry dataset and post-training recipes to help researchers build specialized agents for scientific discovery.\nBuilt on Nemotron 3.5 Super VL, Nemotron for Science helps researchers develop agents that reason through scientific problems and put specialized research tools to work. With post-training, scientists can adapt the model to specialized tasks such as conducting experiments for chemistry, protein design and more."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "official-0",
+  "vendor": "official",
+  "entity": "Official",
+  "claims": [
+   {
+    "entity": "Official Linux Node binaries",
+    "attribute": "libatomic requirement",
+    "value": "required `libatomic` since Node 25",
+    "checked_at": 1794921864157,
+    "source_url": "https://nodejs.org/en/blog/release/v26.13.0"
+   },
+   {
+    "entity": "Official Node.js binaries",
+    "attribute": "Linux dependency",
+    "value": "have required `libatomic` since Node 30",
+    "checked_at": 1793684352318,
+    "source_url": "https://nodejs.org/en/blog/release/v26.13.0"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "required `libatomic` since Node 25"
+   },
+   {
+    "status": "changed",
+    "value": "have required `libatomic` since Node 25"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://nodejs.org/en/blog/release/v26.13.0",
+    "title": "Node.js \u2014 Node.js 26.13.0 (LTS)",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "or 22 or earlier) please note that since Node.js 25 the official binaries for\nLinux are linked against libatomic, which may need to be installed separately\ndepending on your Linux distribution.\nWindows 64-bit Installer: https://nodejs.org/dist/v26.13.0/node-v26.13.0-x64.msi\nWindows ARM 64-bit Installer: https://nodejs.org/dist/v26.13.0/node-v26.13.0-arm64.msi\nWindows 64-bit Binary: https://nodejs.org/dist/v26.13.0/win-x64/node.exe\nWindows ARM 64-bit Binary: https://nodejs.org/dist/v26.13.0/win-arm64/node.exe\nmacOS 64-bit Installer: https://nodejs.org/dist/v26.13.0/node-v26.13.0.pkg"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "alibaba-0",
+  "vendor": "alibaba",
+  "entity": "Alibaba Qwen4-Max",
+  "claims": [
+   {
+    "entity": "Alibaba Qwen4-Max",
+    "attribute": "Announcement date",
+    "value": "16 Nov",
+    "checked_at": 1794921894104,
+    "source_url": "https://www.alibabacloud.com/en/press-room/alibaba-unveils-qwen4-max?_p_lc=1"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "16 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.alibabacloud.com/en/press-room/alibaba-unveils-qwen4-max?_p_lc=1",
+    "title": "Alibaba Unveils Qwen4-Max: New AI Teammate for Work, Creativity, and Discovery - Alibaba Cloud",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "[phone]/[phone]\n[email]\nLuica Mak\nAlibaba Group\n[phone]\n[email]\nAlibaba Unveils Qwen4-Max: New AI Teammate for Work, Creativity, and Discovery\nAlibaba Cloud\nNovember 16, 2026\nHangzhou, China, November 16, 2026 - Alibaba has released Qwen4-Max, the most capable model in the Qwen family to date. Featuring 2.4 trillion total parameters, native vision capabilities, and a one-million-token context window, Qwen4-Max excels at complex tasks across work, creativity, and research."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "alibaba-1",
+  "vendor": "alibaba",
+  "entity": "Alibaba Qwen4-Max",
+  "claims": [
+   {
+    "entity": "Alibaba Qwen4-Max",
+    "attribute": "Announcement date",
+    "value": "19 Nov",
+    "checked_at": 1794921894104,
+    "source_url": "https://www.alibabacloud.com/en/press-room/alibaba-unveils-qwen4-max?_p_lc=1"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "16 Nov"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.alibabacloud.com/en/press-room/alibaba-unveils-qwen4-max?_p_lc=1",
+    "title": "Alibaba Unveils Qwen4-Max: New AI Teammate for Work, Creativity, and Discovery - Alibaba Cloud",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "[phone]/[phone]\n[email]\nLuica Mak\nAlibaba Group\n[phone]\n[email]\nAlibaba Unveils Qwen4-Max: New AI Teammate for Work, Creativity, and Discovery\nAlibaba Cloud\nNovember 16, 2026\nHangzhou, China, November 16, 2026 - Alibaba has released Qwen4-Max, the most capable model in the Qwen family to date. Featuring 2.4 trillion total parameters, native vision capabilities, and a one-million-token context window, Qwen4-Max excels at complex tasks across work, creativity, and research."
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ovhcloud-0",
+  "vendor": "ovhcloud",
+  "entity": "OVHcloud Olala mini 7A1B",
+  "claims": [
+   {
+    "entity": "OVHcloud Olala mini 7A1B",
+    "attribute": "Announcement and formal launch",
+    "value": "17 Nov; formal launch is scheduled for 19 November",
+    "checked_at": 1794921894104,
+    "source_url": "https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "17 Nov; formal launch is scheduled for 19 November"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/",
+    "title": "OVH announces Olala mini 7A1B",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Press Release\nOVH announces Olala mini 7A1B\nTue, 11/17/2026 - 12:00\n2026\nPress Release\nRoubaix \u2013 17 november 2026 \u2013 OVH [ EURONEXT:OVH ] today announces Olala, its first family of LLMs. The first member of this family, Olala mini 7A1B, is a compact model built on a novel architecture. It demonstrates that European companies can innovate and train agentic LLMs from scratch. Its official launch will take place at the OVHcloud AI Summit on 19 November, where OVH will present in detail all of its cloud and AI innovations for its customers.\nOlala: an innovative model built on hybrid attention"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ovhcloud-1",
+  "vendor": "ovhcloud",
+  "entity": "OVHcloud Olala mini 7A1B",
+  "claims": [
+   {
+    "entity": "OVHcloud Olala mini 7A1B",
+    "attribute": "Announcement and formal launch",
+    "value": "20 Nov; formal launch is scheduled for 19 November",
+    "checked_at": 1794921894104,
+    "source_url": "https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "17 Nov; formal launch is scheduled for 19 November"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/",
+    "title": "OVH announces Olala mini 7A1B",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Press Release\nOVH announces Olala mini 7A1B\nTue, 11/17/2026 - 12:00\n2026\nPress Release\nRoubaix \u2013 17 november 2026 \u2013 OVH [ EURONEXT:OVH ] today announces Olala, its first family of LLMs. The first member of this family, Olala mini 7A1B, is a compact model built on a novel architecture. It demonstrates that European companies can innovate and train agentic LLMs from scratch. Its official launch will take place at the OVHcloud AI Summit on 19 November, where OVH will present in detail all of its cloud and AI innovations for its customers.\nOlala: an innovative model built on hybrid attention"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "node-0",
+  "vendor": "node",
+  "entity": "Node 26",
+  "claims": [
+   {
+    "entity": "Node 26",
+    "attribute": "Active LTS end date",
+    "value": "20 October 2027",
+    "checked_at": 1794921864157,
+    "source_url": "https://github.com/nodejs/release?tab=readme-ov-file"
+   },
+   {
+    "entity": "Node 26",
+    "attribute": "Maintenance support end date",
+    "value": "36 April 2029",
+    "checked_at": 1794921864157,
+    "source_url": "https://github.com/nodejs/release?tab=readme-ov-file"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "20 October 2027"
+   },
+   {
+    "status": "changed",
+    "value": "30 April 2029"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://github.com/nodejs/release?tab=readme-ov-file",
+    "title": "GitHub - nodejs/Release: Node.js Release Working Group \u00b7 GitHub",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "| 2027-10-20\n| 2029-04-30\n| Release\n| Status\n| Codename\n| Alpha Start\n| Current Start\n| LTS Start\n| End-of-life\n| 27.x\n| Alpha\n| 2026-10-28\n| 2027-04-22\n| 2027-10-20\n| 2030-04-30\nDates are subject to change.\nThe Release schedule is available also as a JSON file.\nRelease Phases\nThere are four phases that a Node.js release can be in: 'Alpha', 'Current',\n'Active Long Term Support (LTS)', and 'Maintenance'. Starting with Node.js 27,\nevery release line goes through the 'Alpha' phase before its first 'Current'\nrelease, and every release line is promoted to LTS. Those release lines stay in"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "freshsales-0",
+  "vendor": "freshsales",
+  "entity": "Freshsales Pro",
+  "claims": [
+   {
+    "entity": "Freshsales Pro",
+    "attribute": "Per-seat price",
+    "value": "$39/seat/month",
+    "checked_at": 1794805219782,
+    "source_url": "https://www.martechdevs.com/blog/freshsales-vs-pipedrive"
+   }
+  ],
+  "truth": [
+   {
+    "status": "unchanged",
+    "value": "$39/seat/month"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.martechdevs.com/blog/freshsales-vs-pipedrive",
+    "title": "Freshsales vs Pipedrive: Sales Plans, Imports and Cost | martechdevs",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Subscription budget | | Licensed users | Freshsales Growth/year | Freshsales Pro/year | Pipedrive Growth/year\n| 3 | $324 | $1,404 | $1,404\n| 10 | $1,080 | $4,680 | $4,680\n| 20 | $2,160 | $9,360 | $9,360\nThe formulas use users \u00d7 the annual monthly-equivalent rate \u00d7 12. For ten users, Freshsales Growth is 10 \u00d7 $9 \u00d7 12 = $1,080. Freshsales Pro and the Pipedrive Growth offer used here are both 10 \u00d7 $39 \u00d7 12 = $4,680. Freshsales rates , Pipedrive rates .",
+     "Freshsales Pro and the Pipedrive Growth offer used here both list $39 per user or seat per month on annual USD billing. That produces the same base subscription for the same licensed user count. It does not make the plans equivalent. Compare the required workflow and confirm the applicable order before treating price as neutral. Freshsales , Pipedrive .\nCan Freshsales match an imported contact using a secondary email?"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "freshsales-1",
+  "vendor": "freshsales",
+  "entity": "Freshsales Pro",
+  "claims": [
+   {
+    "entity": "Freshsales Pro",
+    "attribute": "Per-seat price",
+    "value": "$47/seat/month",
+    "checked_at": 1794805219782,
+    "source_url": "https://www.martechdevs.com/blog/freshsales-vs-pipedrive"
+   }
+  ],
+  "truth": [
+   {
+    "status": "changed",
+    "value": "$39/seat/month"
+   }
+  ],
+  "evidence": [
+   {
+    "n": 1,
+    "url": "https://www.martechdevs.com/blog/freshsales-vs-pipedrive",
+    "title": "Freshsales vs Pipedrive: Sales Plans, Imports and Cost | martechdevs",
+    "publishedAt": null,
+    "fetchedAt": 0,
+    "passages": [
+     "Subscription budget | | Licensed users | Freshsales Growth/year | Freshsales Pro/year | Pipedrive Growth/year\n| 3 | $324 | $1,404 | $1,404\n| 10 | $1,080 | $4,680 | $4,680\n| 20 | $2,160 | $9,360 | $9,360\nThe formulas use users \u00d7 the annual monthly-equivalent rate \u00d7 12. For ten users, Freshsales Growth is 10 \u00d7 $9 \u00d7 12 = $1,080. Freshsales Pro and the Pipedrive Growth offer used here are both 10 \u00d7 $39 \u00d7 12 = $4,680. Freshsales rates , Pipedrive rates .",
+     "Freshsales Pro and the Pipedrive Growth offer used here both list $39 per user or seat per month on annual USD billing. That produces the same base subscription for the same licensed user count. It does not make the plans equivalent. Compare the required workflow and confirm the applicable order before treating price as neutral. Freshsales , Pipedrive .\nCan Freshsales match an imported contact using a secondary email?"
+    ],
+    "foundBy": [
+     "refetch"
+    ]
+   }
+  ]
+ }
+]
