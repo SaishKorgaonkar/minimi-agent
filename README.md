@@ -11,6 +11,10 @@ back then are re-checked against today's web, one by one.
 
 See **[DESIGN.md](DESIGN.md)** for how it works and why.
 
+![How a turn works, and how the judge prompt was optimised](docs/architecture.png)
+
+<sub>Editable source: [`docs/architecture.excalidraw`](docs/architecture.excalidraw) (open at excalidraw.com).</sub>
+
 ## Run it
 
 ```bash
