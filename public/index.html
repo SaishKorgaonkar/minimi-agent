@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat Agent</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <button class="new-chat" id="newChat">New chat</button>
+    <div class="side-label">History</div>
+    <nav id="conversations" class="conversations"></nav>
+    <div class="side-foot" id="health"></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="toggleSidebar" aria-label="Toggle history">☰</button>
+      <div class="title">Chat agent <span class="muted">· web search · memory</span></div>
+    </header>
+
+    <section id="nudges" class="nudges" hidden></section>
+
+    <section id="messages" class="messages" aria-live="polite">
+      <div class="empty" id="empty">
+        <h1>Ask anything.</h1>
+        <p>It searches the web, cites sources, and remembers what you asked and when.</p>
+        <div class="suggestions">
+          <button data-q="What are the cheapest managed Postgres hosting options right now?">Postgres hosting prices</button>
+          <button data-q="What did I ask you yesterday?">What did I ask yesterday?</button>
+          <button data-q="What did I ask you on 3 November? Is your answer still correct today?">Is my 3 Nov answer still correct?</button>
+        </div>
+      </div>
+    </section>
+
+    <form id="composer" class="composer">
+      <textarea id="input" rows="1" placeholder="Message…" autocomplete="off"></textarea>
+      <button type="submit" id="send" aria-label="Send">↑</button>
+    </form>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

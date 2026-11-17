@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Turn Trace</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body { display: block; padding: 24px 16px; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .q { color: var(--muted); margin-bottom: 18px; }
+    .step { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; margin-bottom: 10px; }
+    .step summary { padding: 10px 14px; cursor: pointer; display: flex; gap: 12px; align-items: baseline; }
+    .step .name { font-weight: 600; font-family: var(--mono); font-size: 13.5px; }
+    .step .ms { color: var(--muted); font-size: 13px; margin-left: auto; }
+    .bar { height: 4px; background: var(--accent); border-radius: 2px; opacity: .6; }
+    pre { margin: 0; padding: 12px 14px; border-top: 1px solid var(--border); overflow-x: auto; font: 12.5px/1.5 var(--mono); background: var(--code); border-radius: 0 0 10px 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/">← back to chat</a>
+    <h1>Turn trace</h1>
+    <div class="q" id="q"></div>
+    <div id="steps"></div>
+  </div>
+  <script type="module">
+    const id = location.pathname.split('/').pop();
+    const { turn, traces } = await fetch(`/api/traces/${id}`).then((r) => r.json());
+    const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    document.getElementById('q').textContent = turn ? `${turn.role === 'assistant' ? 'Answer' : 'Question'} · ${new Date(turn.created_at).toLocaleString()}` : 'Turn not found';
+    const max = Math.max(1, ...traces.map((t) => t.duration_ms || 0));
+    document.getElementById('steps').innerHTML = traces.map((t) => `
+      <details class="step" ${t.step === 'timings' || t.step === 'route' ? 'open' : ''}>
+        <summary><span class="name">${esc(t.step)}</span><span class="ms">${t.duration_ms != null ? `${t.duration_ms} ms` : ''}</span></summary>
+        ${t.duration_ms ? `<div class="bar" style="width:${Math.max(2, (t.duration_ms / max) * 100)}%"></div>` : ''}
+        <pre>${esc(JSON.stringify(t.data, null, 2))}</pre>
+      </details>`).join('') || '<p>No trace recorded.</p>';
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "name": "minimi-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A chat agent with web search that remembers what you asked and when, and checks whether its old answers are still true.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/server.ts",
+    "start": "tsx src/server.ts",
+    "seed": "tsx scripts/seed.ts",
+    "eval": "tsx scripts/eval.ts",
+    "eval:search": "tsx scripts/eval-search.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.115",
+    "@hono/node-server": "^2.1.7",
+    "ai": "^7.0.170",
+    "better-sqlite3": "^13.1.1",
+    "chrono-node": "^2.10.3",
+    "dotenv": "^17.4.2",
+    "hono": "^4.13.18",
+    "pino": "^10.4.0",
+    "sqlite-vec": "^0.1.9",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "better-sqlite3": true
+  }
+}

@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# secrets
+.env
+.env.local
+
+# local data (memory database, snapshots, traces)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# build output
+dist/
+
+# private notes, not part of the submission
+notes/
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
+
+# editor tooling caches
+.impeccable/
