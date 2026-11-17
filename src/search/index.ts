@@ -79,7 +79,7 @@ async function acquire(p: SearchProvider, signal: AbortSignal): Promise<() => vo
 }
 
 export async function webSearch(
-  input: { queries: string[]; after?: Date; before?: Date; topic?: 'general' | 'news'; fresh?: boolean; maxResults?: number; deadlineMs?: number },
+  input: { queries: string[]; after?: Date; before?: Date; topic?: 'general' | 'news'; fresh?: boolean; maxResults?: number; deadlineMs?: number; country?: string },
   registry: SourceRegistry,
   providers: SearchProvider[] = enabledProviders(),
 ): Promise<SearchRun> {
@@ -104,7 +104,7 @@ export async function webSearch(
         let release: (() => void) | undefined;
         try {
           release = await acquire(p, controller.signal);
-          const q: SearchQuery = { query, after: input.after, before: input.before, topic: input.topic, fresh: input.fresh };
+          const q: SearchQuery = { query, after: input.after, before: input.before, topic: input.topic, fresh: input.fresh, country: input.country };
           const results = await p.search(q, controller.signal);
           lists.push(results);
           stats.providers[key] = { ok: true, ms: Math.round(performance.now() - s), results: results.length };

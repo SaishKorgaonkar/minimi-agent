@@ -10,12 +10,13 @@ import { verifyClaims, formatReport } from '../claims/verify.js';
 import { enqueue, inForeground } from '../jobs/queue.js';
 import { disableOptions, isOptionsError, models, providerOptions } from '../llm.js';
 import { log } from '../log.js';
-import { recall, type RecallResult } from '../memory/recall.js';
+import { recall, strongOnly, type RecallResult } from '../memory/recall.js';
 import { formatEvidence, SourceRegistry, webSearch } from '../search/index.js';
 import type { Evidence } from '../search/types.js';
 import { resolveDateRange, type DateRange } from '../time/resolve.js';
 import { formatDay, isoDay, isValidTimezone } from '../time/tz.js';
 import { Tracer } from '../trace.js';
+import { resolveLocation } from '../location.js';
 import { fallbackRoute, route, type Route } from './router.js';
 import { formatMemory, systemPrompt } from './prompts.js';
 
@@ -28,7 +29,7 @@ import { formatMemory, systemPrompt } from './prompts.js';
  */
 
 export type TurnEvent =
-  | { type: 'meta'; conversationId: string; userTurnId: string }
+  | { type: 'meta'; conversationId: string; userTurnId: string; location: string | null }
   | { type: 'status'; text: string }
   | { type: 'recall'; label: string; found: number; range?: { start: number; end: number } }
   | { type: 'sources'; sources: Source[] }
@@ -40,6 +41,8 @@ export interface TurnInput {
   conversationId?: string;
   message: string;
   tz?: string;
+  /** Browser language, e.g. "en-IN": a fallback for the user's country. */
+  locale?: string;
   signal?: AbortSignal;
 }
 
@@ -50,6 +53,8 @@ export function runTurn(input: TurnInput, emit: (e: TurnEvent) => void): Promise
 async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ turnId: string | null; text: string }> {
   const now = clockNow();
   const tz = input.tz && isValidTimezone(input.tz) ? input.tz : config.timezone;
+  const location = resolveLocation(input.locale, input.tz);
+  const country = location?.code;
   const message = input.message.trim().slice(0, 8000);
 
   // 1. Save the question first: even if everything after fails, memory has it.
@@ -60,7 +65,7 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
     sources: null, meta: null, created_at: now.getTime(), tz,
   });
   const tracer = new Tracer(userTurnId);
-  emit({ type: 'meta', conversationId, userTurnId });
+  emit({ type: 'meta', conversationId, userTurnId, location: location?.name ?? null });
 
   try {
     // 2. Dates: deterministic, ~1ms.
@@ -69,7 +74,7 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
 
     // 3. Routing and memory lookup run in parallel.
     const inContext = new Set(recent.filter((t) => t.role === 'user').map((t) => t.id));
-    const routing = tracer.span('route', () => route({ message, recent, range, now, tz }), (r) => r);
+    const routing = tracer.span('route', () => route({ message, recent, range, now, tz, location: location?.name }), (r) => r);
     const recalling = tracer.span('recall', () => recall({ query: message, range, excludeTurnId: userTurnId, alreadyInContext: inContext }),
       (r) => ({ mode: r.mode, found: r.exchanges.length, ids: r.exchanges.map((e) => e.userTurnId) }));
 
@@ -87,6 +92,8 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
     if (memory.mode === 'range' && !memory.exchanges.length && (plan.intent === 'search' || plan.intent === 'chat')) {
       memory = { mode: 'none', exchanges: [], facts: new Map() };
     }
+    // A question about the world only gets memory that is clearly related.
+    if (plan.intent === 'search' || plan.intent === 'chat') memory = strongOnly(memory);
     emitRecall(memory, tz, emit);
 
     // 4. Gather evidence before the answer model starts.
@@ -105,7 +112,7 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
       emit({ type: 'status', text: 'Searching the web' });
       const after = plan.onlySinceDate && range ? range.start : undefined;
       const run = await tracer.span('search', () => webSearch({
-        queries: plan.searchQueries.length ? plan.searchQueries : [message], after, topic: plan.topic,
+        queries: plan.searchQueries.length ? plan.searchQueries : [message], after, topic: plan.topic, country,
       }, registry), (r) => r.stats);
       evidence = run.evidence;
     }
@@ -114,7 +121,7 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
 
     // 5. Stream the answer. The model can still search (single tool) if the evidence isn't enough.
     const instructions = systemPrompt({
-      now, tz,
+      now, tz, location,
       memory: formatMemory(memory, tz),
       verification,
       evidence: evidence.length ? formatEvidence(evidence) : null,
@@ -134,7 +141,7 @@ async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ t
         execute: async ({ query, after, topic }) => {
           emit({ type: 'status', text: `Searching: ${query}` });
           const afterDate = after && !Number.isNaN(Date.parse(after)) ? new Date(after) : undefined;
-          const run = await tracer.span('tool_search', () => webSearch({ queries: [query], after: afterDate, topic }, registry), (r) => r.stats);
+          const run = await tracer.span('tool_search', () => webSearch({ queries: [query], after: afterDate, topic, country }, registry), (r) => r.stats);
           emit({ type: 'sources', sources: toSources(registry.all()) });
           return formatEvidence(run.evidence);
         },

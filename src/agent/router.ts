@@ -31,7 +31,7 @@ export const routeSchema = z.object({
 export type Route = z.infer<typeof routeSchema> & { source: 'model' | 'fallback' };
 
 export async function route(
-  input: { message: string; recent: Turn[]; range: DateRange | null; now: Date; tz: string },
+  input: { message: string; recent: Turn[]; range: DateRange | null; now: Date; tz: string; location?: string },
   instructions = prompt('router'),
 ): Promise<Route> {
   const history = input.recent.slice(-4).map((t) => `${t.role.toUpperCase()}: ${truncate(t.content, 400)}`).join('\n');
@@ -43,6 +43,7 @@ export async function route(
       instructions,
       prompt:
         `Now: ${formatDateTime(input.now, input.tz)} (${input.tz})\n` +
+        (input.location ? `User's location: ${input.location}\n` : '') +
         (input.range ? `The message refers to: ${input.range.label} ("${input.range.text}")\n` : '') +
         (history ? `\nRecent conversation:\n${history}\n` : '') +
         `\nMessage: ${input.message}`,

@@ -27,7 +27,7 @@ app.get('/api/health', (c) => c.json({
 }));
 
 app.post('/api/chat', async (c) => {
-  const body = await c.req.json<{ message?: string; conversationId?: string; tz?: string }>().catch(() => null);
+  const body = await c.req.json<{ message?: string; conversationId?: string; tz?: string; locale?: string }>().catch(() => null);
   const message = body?.message?.trim();
   if (!message) return c.json({ error: 'message is required' }, 400);
   const problems = assertConfig();
@@ -45,7 +45,7 @@ app.post('/api/chat', async (c) => {
     const send = (e: TurnEvent) => {
       writes = writes.then(() => stream.writeSSE({ event: e.type, data: JSON.stringify(e) })).catch(() => {});
     };
-    const run = () => runTurn({ message, conversationId: body?.conversationId, tz: body?.tz, signal: controller.signal }, send);
+    const run = () => runTurn({ message, conversationId: body?.conversationId, tz: body?.tz, locale: body?.locale, signal: controller.signal }, send);
     await (at ? withNow(at, run) : run());
     await writes;
   });

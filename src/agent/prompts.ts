@@ -1,4 +1,5 @@
 import type { Exchange } from '../db/repo.js';
+import type { UserLocation } from '../location.js';
 import type { RecallResult } from '../memory/recall.js';
 import { formatDateTime } from '../time/tz.js';
 import { truncate } from '../util.js';
@@ -6,6 +7,7 @@ import { truncate } from '../util.js';
 export function systemPrompt(input: {
   now: Date;
   tz: string;
+  location?: UserLocation | null;
   memory: string | null;
   verification: string | null;
   evidence: string | null;
@@ -13,6 +15,7 @@ export function systemPrompt(input: {
   const parts = [
     `You are a fast, accurate chat assistant with live web search and a long-term memory of past conversations with this user.`,
     `Current time: ${formatDateTime(input.now, input.tz)} (${input.tz}).`,
+    ...(input.location ? [`The user is in ${input.location.name} (from their browser settings). For anything that depends on place (prices, availability, stores, delivery, laws, weather), answer for ${input.location.name} by default: local currency and local retailers, and search with that in mind. Say in a few words that you assumed ${input.location.name}. If they name another place, use that instead.`] : []),
     ``,
     `## How to answer`,
     `- Lead with the answer. Be concise: short paragraphs, bullets, or a compact table when comparing things. No filler and no restating the question.`,

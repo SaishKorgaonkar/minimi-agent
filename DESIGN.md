@@ -18,10 +18,12 @@ save question ─► resolve dates (code) ─► route ‖ recall ─► gather 
 1. **Dates are resolved in code** (`time/resolve.ts`), in the browser's timezone. LLMs are unreliable at calendar maths, and
    LongMemEval's largest temporal gain came from narrowing retrieval to the right window.
 2. **Routing and recall run in parallel.** The router picks *chat / search / recall / recall+verify* and writes the first
-   queries, which run **before** the answer model starts. If it is slow, a regex fallback decides.
+   queries, which run **before** the answer model starts. If it is slow, a regex fallback decides. The user's country (from the
+   browser's timezone, then language) goes to the router, the search providers and the prompt, so prices come in local currency and stores.
 3. **Recall** (`memory/recall.ts`): a date returns every exchange that day ("what did I ask on 3 Nov?" shares no words with
    the answer). Otherwise hybrid search (FTS5 + embeddings, rank fusion) runs over turns *and* extracted facts. An empty date
-   is said out loud, along with the nearest real conversation, so nothing is invented.
+   is said out loud, along with the nearest real conversation, so nothing is invented. A question about the world only gets memory that is close in meaning
+   (cosine ≤ 0.5), so "latest pricing" for a game doesn't surface a CRM chat; keyword matches count when asking about our past.
 4. **Re-verification** (`claims/verify.ts`): after each answer, a job extracts **claims** (`entity, attribute, value,
    source, checked_at`) and snapshots their sources. "Still correct?" re-fetches each source (an identical hash means
    unchanged, no LLM), searches current state and news since the date per vendor, and **one batched judge call** marks each

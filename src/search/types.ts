@@ -7,6 +7,8 @@ export interface SearchQuery {
   /** 'news' prefers recent announcements; 'general' is normal web search. */
   topic?: 'general' | 'news';
   maxResults?: number;
+  /** The user's country (ISO 3166-1 alpha-2): providers rank local results higher. */
+  country?: string;
   /** Ask the provider for freshly crawled content (slower; used when re-verifying). */
   fresh?: boolean;
 }

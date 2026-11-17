@@ -135,7 +135,7 @@ async function send(text) {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ message: text, conversationId: state.conversationId, tz }),
+      body: JSON.stringify({ message: text, conversationId: state.conversationId, tz, locale: navigator.language }),
     });
     if (!res.ok || !res.body) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -160,6 +160,7 @@ async function send(text) {
               state.conversationId = e.conversationId;
               localStorage.setItem('conversationId', e.conversationId);
             }
+            showLocation(e.location);
             break;
           case 'status': a.setStatus(e.text); break;
           case 'recall': a.addChip(e.label, e.found ? 'recall' : 'recall none'); break;
@@ -260,8 +261,14 @@ async function loadHealth() {
   const el = $('#health');
   if (!h) return;
   el.innerHTML = h.ok
-    ? `Search: ${h.searchProviders.join(' + ')}<br>Model: ${h.models.answer}`
+    ? `Search: ${h.searchProviders.join(' + ')}<br>Model: ${h.models.answer}<br><span id="location"></span>`
     : `<span class="bad">${h.problems.map(escapeHtml).join('<br>')}</span>`;
+}
+
+// Where answers are localised for (prices, stores), as the server worked it out.
+function showLocation(name) {
+  const el = $('#location');
+  if (el) el.textContent = name ? `Location: ${name} (from your browser)` : '';
 }
 
 // ---------- wiring ----------

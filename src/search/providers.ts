@@ -38,6 +38,7 @@ export const exa: SearchProvider = {
       },
     };
     if (q.topic === 'news') body.category = 'news';
+    if (q.country) body.userLocation = q.country;
     if (q.after) body.startPublishedDate = q.after.toISOString();
     if (q.before) body.endPublishedDate = q.before.toISOString();
     const data = await postJson('https://api.exa.ai/search', body, { 'x-api-key': config.keys.exa }, signal);
@@ -65,6 +66,8 @@ export const tavily: SearchProvider = {
       chunks_per_source: 3,
       include_published_date: true,
     };
+    // Tavily's country boost only applies to general searches, and takes a lowercase English name.
+    if (q.country && body.topic === 'general') body.country = countryName(q.country)?.toLowerCase();
     if (q.after) body.start_date = ymd(q.after);
     if (q.before) body.end_date = ymd(q.before);
     const data = await postJson('https://api.tavily.com/search', body, { authorization: `Bearer ${config.keys.tavily}` }, signal);
@@ -88,6 +91,7 @@ export const brave: SearchProvider = {
       count: String(q.maxResults ?? config.search.resultsPerProvider),
       extra_snippets: 'true',
     });
+    if (q.country) params.set('country', q.country);
     if (q.after) params.set('freshness', `${ymd(q.after)}to${ymd(q.before ?? now())}`);
     const res = await fetch(`https://api.search.brave.com/res/v1/web/search?${params}`, {
       headers: { accept: 'application/json', 'x-subscription-token': config.keys.brave },
@@ -105,6 +109,11 @@ export const brave: SearchProvider = {
     }));
   },
 };
+
+const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+function countryName(code: string): string | undefined {
+  return regionNames.of(code);
+}
 
 function stripTags(s: string) {
   return s.replace(/<[^>]+>/g, '');
