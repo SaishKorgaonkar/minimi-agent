@@ -1,72 +1,82 @@
 # Design
 
-## The problem, restated
+## The problem
 
-The example questions all have the same shape: **recall something from a date, then check it is still true.**
-"On Monday we shortlisted 5 CRMs. Has any changed pricing since?" needs four things: resolve "Monday" to a
-date, find that conversation, know *what was claimed* in it, and look for changes *since then*. LongMemEval
-covers the memory half and search benchmarks cover freshness. Nothing covers both, so that's what this is built for.
+Every example question has the same shape: **recall something from a date, then check it is still true.**
+"On Monday we shortlisted 5 CRMs. Has any changed pricing since?" means resolving "Monday", finding that conversation,
+knowing *what was claimed* in it, and looking for changes *since then*. LongMemEval covers the memory half and search
+benchmarks cover freshness. This is built for both together.
 
 ## How a turn works
 
 ```
-question ─► save (time + timezone) ─► resolve dates in code ─► route ‖ recall ─► gather evidence ─► stream answer ─► save + enqueue jobs
-                                         "last Tuesday" →        fast model    verify old claims     gpt-6.1-sol,       index, extract
-                                         exact [start, end)      + memory      or run first search   ≤3 more searches   claims, snapshot
+save question ─► resolve dates (code) ─► route ‖ recall ─► gather evidence ─► stream answer ─► save + enqueue jobs
+                 "last Tue" → [start,end)  gpt-6-luna   re-check old claims   gpt-6.1-sol      index, extract claims,
+                                           + memory     or first search       may search again snapshot sources
 ```
 
-1. **Dates are resolved by code, not the model** (`time/resolve.ts`). The user's timezone comes from the browser.
-   LLMs are unreliable at calendar maths, and LongMemEval's biggest temporal gain came from narrowing retrieval to the right time window.
-2. **Routing and recall run in parallel.** A fast model (`gpt-6-luna`) picks *chat / search / recall / recall+verify*
-   and writes the first search queries. That search runs **before** the answer model starts, saving a model round trip.
-3. **Recall** (`memory/recall.ts`): with a date range, every exchange in it is recalled, because "what did I ask on 3 Nov?"
-   has no word overlap with the answer, so ranking alone would miss it. Without a date, hybrid search runs over turns *and* extracted facts
-   (FTS5 + embeddings, reciprocal rank fusion). If a date has nothing, the prompt says so and names the nearest conversation, so the model doesn't make one up.
-4. **Re-verification** (`claims/verify.ts`): after every answer, a background job extracts **claims**
-   (`entity, attribute, value, source, checked_at`) and snapshots their source pages. "Still correct?" then becomes: re-fetch each
-   source and compare it with the snapshot (an identical hash means unchanged, no LLM needed), search for news since that date, and have one judge call per
-   entity mark each claim *changed / unchanged / couldn't verify*. Changed claims get a new version and the old one is kept (`superseded_by`).
-   This matters because **pricing pages change without a new publish date**, so a date-filtered search alone misses them.
-5. **One tool, `web_search`.** Each provider configured in `.env` (Exa, Tavily, Brave) is queried in parallel under a time cap, and the run continues with whichever providers answered.
-   Results are merged by normalised URL and reciprocal rank fusion, with a recency boost inside date windows and at most 2 results per domain.
-   Pages are fetched only when the provider returned no text. Sources are numbered once per turn, so citations stay stable.
-6. **Durable background jobs** (`jobs/queue.ts`, ~100 lines on SQLite) are enqueued in the same transaction as the answer.
-   Steps are saved, so a crash resumes a job instead of repeating paid LLM calls. Retries back off. A scheduled job re-checks old claims
-   and creates a **nudge only when something changed** ("quiet the rest of the time").
+1. **Dates are resolved in code** (`time/resolve.ts`), in the browser's timezone. LLMs are unreliable at calendar maths, and
+   LongMemEval's largest temporal gain came from narrowing retrieval to the right window.
+2. **Routing and recall run in parallel.** The router picks *chat / search / recall / recall+verify* and writes the first
+   queries, which run **before** the answer model starts. If it is slow, a regex fallback decides.
+3. **Recall** (`memory/recall.ts`): a date returns every exchange that day ("what did I ask on 3 Nov?" shares no words with
+   the answer). Otherwise hybrid search (FTS5 + embeddings, rank fusion) runs over turns *and* extracted facts. An empty date
+   is said out loud, along with the nearest real conversation, so nothing is invented.
+4. **Re-verification** (`claims/verify.ts`): after each answer, a job extracts **claims** (`entity, attribute, value,
+   source, checked_at`) and snapshots their sources. "Still correct?" re-fetches each source (an identical hash means
+   unchanged, no LLM), searches current state and news since the date per vendor, and **one batched judge call** marks each
+   claim *changed / unchanged / couldn't verify*. Changed claims get a new version and the old one is kept (`superseded_by`).
+   Pricing pages change without a new publish date, so a date-filtered search alone would miss it.
+5. **One tool, `web_search`.** Exa, Tavily and Brave (whichever keys are set) run in parallel under a deadline. Requests queue per
+   provider, and slow providers get a 400 ms grace once every query has results. Results are merged by URL with reciprocal rank
+   fusion, a recency boost inside date windows, and at most 2 per domain. Sources are numbered once per turn.
+6. **Durable jobs** (`jobs/queue.ts`, SQLite) are enqueued in the answer's transaction. Completed steps are saved, so a crash
+   doesn't repeat paid calls. No job starts while a chat turn runs. A scheduled re-check **nudges only when something changed**.
 
 ## Why these choices
 
 | Choice | Why |
 |---|---|
-| SQLite (WAL, FTS5, sqlite-vec), one local file | Memory is local and inspectable, like an on-device Mac app. The worker and server share it. No setup for reviewers. |
-| Memory as context, not a second tool | Keeps the one-tool rule, saves a round trip, and recall is never skipped by a model that "forgot" to call it |
-| Facts indexed *alongside* raw turns | LongMemEval: facts alone lose information; added to the index, they improve recall |
-| Claims + snapshots | Turns "is it still true?" into a comparison instead of a vague re-search |
-| Fast model routes, strong model answers | Routing runs every turn, so it must be fast and cheap; quality matters where the user reads |
-| Vercel AI SDK | Provider-agnostic: switching to Claude is a change in `llm.ts` |
-| Traces table + `/debug/turn/:id` | Every answer shows its route, searches, timings and sources |
+| SQLite (WAL, FTS5, sqlite-vec), one file | Local and inspectable like an on-device app; worker and server share it; no setup for reviewers |
+| Memory as context, not a second tool | Keeps the one-tool rule, saves a round trip, never skipped by a model that "forgot" |
+| Facts indexed *alongside* raw turns | LongMemEval: facts alone lose information; added to the index they improve recall |
+| Claims + snapshots | "Is it still true?" becomes a comparison, not a vague re-search |
+| Fast router, strong answerer | Routing runs every turn; quality matters where the user reads |
+| Vercel AI SDK, traces at `/debug/turn/:id` | Provider swap is one file; every answer shows its route, searches and timings |
 
-## Considered and rejected
+**Rejected:** OpenAI's built-in search (hides retrieval, where quality comes from). Postgres/PGlite (a server, or a young
+embed). A vector database (cosine inside a date filter is enough for one person). A memory tool (extra round trip, may not be
+called). Whole history in context (LongMemEval: long context isn't memory). Inngest/Temporal (an extra dev server).
 
-- **OpenAI's built-in web search**: convenient, but it hides retrieval, which is where the quality comes from.
-- **Postgres / PGlite**: good features (`tstzrange`, pgvector) but a server to run, or a young single-connection embed. SQLite fits local-first better.
-- **A vector database**: brute-force cosine inside a date filter is enough for one person's history. A `vec0` ANN index is the next step at scale.
-- **A memory tool the model calls**: an extra round trip, and the model may not call it.
-- **Sending the whole history as context**: LongMemEval shows long context isn't memory, and it gets slower and costlier with every turn.
-- **Inngest / Temporal**: real durable execution, but an extra dev server for reviewers. The SQLite queue covers what's needed.
-- **Speculative search on the raw message** (before routing): faster, but follow-ups like "has any of them changed?" make poor queries.
+## Measured (real models and search, 17 Nov 2026)
 
-## Measured
+`npm run eval`: LongMemEval's five abilities, two re-verifications, fresh search and small talk, checked in code and by an
+LLM judge. **9/9 pass. First word p50 3.7 s.**
 
-`npm run eval` (real models: LongMemEval's five abilities + re-verification + fresh search, judged and checked) and
-`npm run eval:search` (provider freshness: latency, dated results, date-filter compliance) write their tables to `data/eval/`.
+| Kind of turn | First word | Total |
+|---|---|---|
+| Recall, knowledge update, abstention, small talk | 2.7–3.8 s | 3.7–7.4 s |
+| Fresh web search | 4.8 s | 15.4 s |
+| Re-verify 4–5 vendors against today's web | 15.6–16.6 s | 19.7–21.3 s |
 
-<!-- Paste data/eval/results.md and data/eval/search.md summaries here after running. -->
+`npm run eval:search -- --judge` (10 dated news queries): **Exa** p50 0.5 s, 100% dated, 100% in window, 73% relevant.
+**Tavily** p50 1.4 s (p90 3.4 s), 82% dated, 100% in window, 48% relevant.
+
+**What running it live changed** (each measured, then fixed):
+- Free-tier search keys serve only a few requests at once (Exa ~4, Tavily ~1). Re-checking 6 vendors sent 24 searches and all
+  timed out. Hence the per-provider queues, and claims grouped by vendor with two queries each.
+- Concurrent OpenAI calls on one key came back one at a time (5 judges finishing ~3 s apart). Hence one batched judge call,
+  and the worker pausing during turns. Without the pause, back-to-back questions had a first word p50 of 12 s.
+- The router at reasoning `none` takes 1.3–2.4 s instead of 3.4–4.4 s, with the same accuracy. Re-verification starts speculatively
+  while it routes, when the date matched a stored conversation and the question plainly asks "has this changed?".
+- Exa `lite` rejects `maxAgeHours`, so freshness comes from re-fetching the page. "Tue, 3 Nov" resolved to last Tuesday;
+  an explicit date now wins.
+
+**Known gaps:** a re-check recalls only that day, so a later update ("the team is now 35") isn't weighed. Pages that render
+prices with JavaScript come back "couldn't verify".
 
 ## With another week
 
-- **Proactive by default**: re-check on a schedule tuned per claim type (prices weekly, versions monthly) and send nudges to the Mac notification centre.
-- **Cloudflare Agents SDK / Durable Objects**: one agent per user with its own SQLite, scheduling and WebSockets. The design maps one-to-one.
-- **Headless fetch** for JavaScript-rendered pricing pages, which today come back "couldn't verify".
-- **Structured diffs of snapshots** (price tables → JSON), so "what changed" doesn't need an LLM at all.
-- **A bigger eval set** built from real usage, and A/B runs of search providers and models from the same harness.
+Re-check schedules per claim type (prices weekly, versions monthly) with Mac notifications. One Cloudflare Durable Object per
+user (its own SQLite, scheduling and WebSockets; the design maps one-to-one). Headless fetch for JavaScript pricing pages.
+Structured snapshot diffs, so "what changed" needs no LLM. A larger eval set from real usage, with provider and model A/B runs.

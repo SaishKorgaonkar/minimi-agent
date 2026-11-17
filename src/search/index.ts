@@ -50,8 +50,36 @@ export interface SearchRun {
   };
 }
 
+/**
+ * Per-provider concurrency limit, shared by every search in the process, so a
+ * burst (e.g. re-verifying six vendors) queues instead of tripping rate limits.
+ */
+const slots = new Map<string, { active: number; waiting: (() => void)[] }>();
+
+async function acquire(p: SearchProvider, signal: AbortSignal): Promise<() => void> {
+  const limit = p.maxConcurrent ?? Infinity;
+  const s = slots.get(p.name) ?? { active: 0, waiting: [] };
+  slots.set(p.name, s);
+  if (s.active >= limit) {
+    await new Promise<void>((resolve, reject) => {
+      const go = () => { signal.removeEventListener('abort', cancel); resolve(); };
+      const cancel = () => { s.waiting = s.waiting.filter((w) => w !== go); reject(new Error('This operation was aborted (queued)')); };
+      s.waiting.push(go);
+      signal.addEventListener('abort', cancel, { once: true });
+    });
+  }
+  s.active++;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    s.active--;
+    s.waiting.shift()?.();
+  };
+}
+
 export async function webSearch(
-  input: { queries: string[]; after?: Date; before?: Date; topic?: 'general' | 'news'; fresh?: boolean; maxResults?: number },
+  input: { queries: string[]; after?: Date; before?: Date; topic?: 'general' | 'news'; fresh?: boolean; maxResults?: number; deadlineMs?: number },
   registry: SourceRegistry,
   providers: SearchProvider[] = enabledProviders(),
 ): Promise<SearchRun> {
@@ -61,27 +89,40 @@ export async function webSearch(
   if (!providers.length || !queries.length) return { evidence: [], stats };
 
   // 1. Fan out: every query to every provider, all at once, under one deadline.
+  //    Once every query has results from some provider, the slower ones get a
+  //    short grace window instead of the full deadline.
   const controller = new AbortController();
-  const deadline = setTimeout(() => controller.abort(), config.search.providerTimeoutMs);
+  const deadline = setTimeout(() => controller.abort(), input.deadlineMs ?? config.search.providerTimeoutMs);
+  let grace: NodeJS.Timeout | undefined;
+  const answered = new Set<string>();
   const lists: RawResult[][] = [];
   await Promise.all(
     providers.flatMap((p) =>
       queries.map(async (query) => {
         const s = performance.now();
         const key = `${p.name}:${query.slice(0, 40)}`;
+        let release: (() => void) | undefined;
         try {
+          release = await acquire(p, controller.signal);
           const q: SearchQuery = { query, after: input.after, before: input.before, topic: input.topic, fresh: input.fresh };
           const results = await p.search(q, controller.signal);
           lists.push(results);
           stats.providers[key] = { ok: true, ms: Math.round(performance.now() - s), results: results.length };
+          if (results.length) answered.add(query);
+          if (!grace && answered.size === queries.length && providers.length > 1) {
+            grace = setTimeout(() => controller.abort(), config.search.graceMs);
+          }
         } catch (err) {
           stats.providers[key] = { ok: false, ms: Math.round(performance.now() - s), results: 0, error: String((err as Error).message ?? err).slice(0, 160) };
+        } finally {
+          release?.();
         }
       }),
     ),
   );
   clearTimeout(deadline);
-  if (!lists.length) log.warn({ stats }, 'all search providers failed or timed out');
+  clearTimeout(grace);
+  if (!lists.length) log.warn({ stats: { ...stats, ms: Math.round(performance.now() - t0) } }, 'all search providers failed or timed out');
 
   // 2. Merge.
   const merged = fuse(lists, { after: input.after, maxResults: input.maxResults ?? config.search.maxResults });

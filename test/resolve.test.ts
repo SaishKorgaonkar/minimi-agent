@@ -24,6 +24,9 @@ test('absolute dates', () => {
   assert.equal(day('What did I ask you on 3 November? Is your answer still correct today?')?.start, '2026-11-03');
   assert.equal(day('What did I ask you on 3 November?')?.start, '2026-11-03');
   assert.equal(day('what about Nov 3rd')?.start, '2026-11-03');
+  // A weekday next to an explicit date: the date wins.
+  assert.equal(day('What did I ask you on Tue, 3 Nov 2026?')?.start, '2026-11-03');
+  assert.equal(day('what did we discuss on Wednesday 14 October')?.start, '2026-10-14');
   assert.equal(day('what did I ask on 25 December')?.start, '2025-12-25'); // future → last year
   assert.equal(day('anything from October?')?.g, 'month');
 });

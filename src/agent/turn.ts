@@ -7,7 +7,7 @@ import {
   claimsForTurns, ensureConversation, insertTurn, recentTurns, type Exchange, type Source,
 } from '../db/repo.js';
 import { verifyClaims, formatReport } from '../claims/verify.js';
-import { enqueue } from '../jobs/queue.js';
+import { enqueue, inForeground } from '../jobs/queue.js';
 import { disableOptions, isOptionsError, models, providerOptions } from '../llm.js';
 import { log } from '../log.js';
 import { recall, type RecallResult } from '../memory/recall.js';
@@ -16,7 +16,7 @@ import type { Evidence } from '../search/types.js';
 import { resolveDateRange, type DateRange } from '../time/resolve.js';
 import { formatDay, isoDay, isValidTimezone } from '../time/tz.js';
 import { Tracer } from '../trace.js';
-import { route, type Route } from './router.js';
+import { fallbackRoute, route, type Route } from './router.js';
 import { formatMemory, systemPrompt } from './prompts.js';
 
 /**
@@ -43,7 +43,11 @@ export interface TurnInput {
   signal?: AbortSignal;
 }
 
-export async function runTurn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ turnId: string | null; text: string }> {
+export function runTurn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ turnId: string | null; text: string }> {
+  return inForeground(() => turn(input, emit));
+}
+
+async function turn(input: TurnInput, emit: (e: TurnEvent) => void): Promise<{ turnId: string | null; text: string }> {
   const now = clockNow();
   const tz = input.tz && isValidTimezone(input.tz) ? input.tz : config.timezone;
   const message = input.message.trim().slice(0, 8000);
@@ -65,11 +69,17 @@ export async function runTurn(input: TurnInput, emit: (e: TurnEvent) => void): P
 
     // 3. Routing and memory lookup run in parallel.
     const inContext = new Set(recent.filter((t) => t.role === 'user').map((t) => t.id));
-    const [plan, recalled] = await Promise.all([
-      tracer.span('route', () => route({ message, recent, range, now, tz }), (r) => r),
-      tracer.span('recall', () => recall({ query: message, range, excludeTurnId: userTurnId, alreadyInContext: inContext }),
-        (r) => ({ mode: r.mode, found: r.exchanges.length, ids: r.exchanges.map((e) => e.userTurnId) })),
-    ]);
+    const routing = tracer.span('route', () => route({ message, recent, range, now, tz }), (r) => r);
+    const recalling = tracer.span('recall', () => recall({ query: message, range, excludeTurnId: userTurnId, alreadyInContext: inContext }),
+      (r) => ({ mode: r.mode, found: r.exchanges.length, ids: r.exchanges.map((e) => e.userTurnId) }));
+
+    // Speculative re-verification: when the message names a day we have a
+    // conversation for and plainly asks whether it still holds, start checking
+    // while the router is still deciding (~2 s saved). Used only if the router
+    // agrees; it writes into its own source registry so a discarded run leaves
+    // no trace in this turn's sources.
+    const early = speculate(message, range, recalling, tz, emit, tracer);
+    const [plan, recalled] = await Promise.all([routing, recalling]);
     let memory = recalled;
     tracer.mark('planned');
     // A date in a question about the world ("what happened on 3 Nov?") isn't a memory lookup:
@@ -80,12 +90,16 @@ export async function runTurn(input: TurnInput, emit: (e: TurnEvent) => void): P
     emitRecall(memory, tz, emit);
 
     // 4. Gather evidence before the answer model starts.
-    const registry = new SourceRegistry();
+    let registry = new SourceRegistry();
     let verification: string | null = null;
     let evidence: Evidence[] = [];
 
     const wantsVerify = plan.intent === 'recall_verify' && memory.exchanges.length > 0;
-    if (wantsVerify) {
+    const speculative = wantsVerify ? await early : null;
+    if (speculative) {
+      registry = speculative.registry;
+      verification = speculative.text;
+    } else if (wantsVerify) {
       verification = await tracer.span('verify', () => verifyPast(memory.exchanges, range, plan, registry, emit, tz), (v) => ({ chars: v?.length ?? 0 }));
     } else if (plan.intent === 'search' || (plan.intent === 'recall_verify' && !memory.exchanges.length && plan.searchQueries.length)) {
       emit({ type: 'status', text: 'Searching the web' });
@@ -200,6 +214,24 @@ async function streamAnswer(opts: {
 }
 
 /** "Has anything changed since?" — re-check the claims from the recalled conversations. */
+function speculate(
+  message: string, range: DateRange | null, recalling: Promise<RecallResult>, tz: string,
+  emit: (e: TurnEvent) => void, tracer: Tracer,
+): Promise<{ registry: SourceRegistry; text: string } | null> {
+  if (!range) return Promise.resolve(null);
+  const guess = fallbackRoute(message, range);
+  if (guess.intent !== 'recall_verify') return Promise.resolve(null);
+  return recalling.then(async (r) => {
+    if (r.mode !== 'range' || !r.exchanges.length) return null;
+    const registry = new SourceRegistry();
+    const text = await tracer.span('verify', () => verifyPast(r.exchanges, range, guess, registry, emit, tz), (v) => ({ chars: v?.length ?? 0, speculative: true }));
+    return { registry, text };
+  }).catch((err) => {
+    log.warn({ err: String(err) }, 'speculative verification failed');
+    return null;
+  });
+}
+
 async function verifyPast(exchanges: Exchange[], range: DateRange | null, plan: Route, registry: SourceRegistry, emit: (e: TurnEvent) => void, tz: string): Promise<string> {
   const since = range?.start ?? new Date(Math.min(...exchanges.map((e) => e.createdAt)));
   const assistantIds = exchanges.map((e) => e.assistantTurnId).filter((x): x is string => !!x);

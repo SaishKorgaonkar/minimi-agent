@@ -24,6 +24,8 @@ export interface RawResult {
 
 export interface SearchProvider {
   name: string;
+  /** How many requests this provider serves at once on our key; extra requests queue. */
+  maxConcurrent?: number;
   search(q: SearchQuery, signal: AbortSignal): Promise<RawResult[]>;
 }
 

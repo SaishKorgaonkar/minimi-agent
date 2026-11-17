@@ -21,7 +21,7 @@ export const routeSchema = z.object({
     'recall_verify: refers to an earlier conversation AND asks whether it is still true or what changed since.',
   ),
   searchQueries: z.array(z.string()).describe(
-    '0-3 specific web search queries for this turn (empty for chat/recall). Resolve pronouns using the conversation. Include the current year for time-sensitive topics.',
+    '0-4 specific web search queries for this turn (empty for chat/recall). When comparing named products, one query per product. Resolve pronouns using the conversation. Include the current year for time-sensitive topics.',
   ),
   topic: z.enum(['general', 'news']).describe('news when the user wants recent announcements or changes'),
   onlySinceDate: z.boolean().describe('true when results should be limited to after the date the user referred to ("since then", "since Monday")'),
@@ -46,19 +46,19 @@ export async function route(input: { message: string; recent: Turn[]; range: Dat
   );
   const out = await within(call, config.agent.routerTimeoutMs, null);
   if (!out) return fallbackRoute(input.message, input.range);
-  return { ...out, searchQueries: out.searchQueries.slice(0, 3), source: 'model' };
+  return { ...out, searchQueries: out.searchQueries.slice(0, 4), source: 'model' };
 }
 
 /** Used if the router is slow or fails: simple rules, biased toward searching. */
 export function fallbackRoute(message: string, range: DateRange | null): Route {
   const m = message.toLowerCase();
-  const asksAboutPast = /\b(did i|i asked|we (discussed|talked|shortlisted|decided|compared)|you (said|told|answered|recommended)|remember|earlier|last time)\b/.test(m);
+  const asksAboutPast = /\b(did (i|we)|i asked|(i|we) (mentioned|discussed|talked|shortlisted|decided|compared|said)|you (said|told|answered|recommended)|remember|earlier|last time|my (team|budget|company))\b/.test(m);
   const asksIfChanged = /\b(still|changed|change|since|any update|today|now|current|correct|true)\b/.test(m);
-  const smallTalk = /^(hi|hello|hey|thanks|thank you|ok|okay|cool|great)\b[\s!.]*$/.test(m.trim());
+  const smallTalk = /^(hi|hello|hey|thanks|thank you|ok|okay|cool|great|nice|perfect)\b/.test(m.trim()) && m.split(/\s+/).length <= 6 && !m.includes('?');
   if (smallTalk) return { intent: 'chat', searchQueries: [], topic: 'general', onlySinceDate: false, source: 'fallback' };
   if ((range || asksAboutPast) && asksIfChanged) {
     return { intent: 'recall_verify', searchQueries: [], topic: 'news', onlySinceDate: true, source: 'fallback' };
   }
-  if (range && asksAboutPast) return { intent: 'recall', searchQueries: [], topic: 'general', onlySinceDate: false, source: 'fallback' };
+  if (asksAboutPast) return { intent: 'recall', searchQueries: [], topic: 'general', onlySinceDate: false, source: 'fallback' };
   return { intent: 'search', searchQueries: [message.slice(0, 200)], topic: 'general', onlySinceDate: false, source: 'fallback' };
 }

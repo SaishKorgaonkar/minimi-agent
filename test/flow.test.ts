@@ -48,16 +48,21 @@ const router = new MockLanguageModelV4({
   },
 });
 
-// Extraction and verification judge share the "extract" model.
+// Extraction and the verification judge share the "extract" mock model.
 const extract = new MockLanguageModelV4({
   doGenerate: async (options) => {
     const p = promptText(options);
     if (p.includes('EARLIER CLAIMS')) {
-      const changed = p.includes('Entity: Pipedrive');
-      return generated({
-        claims: [{ index: 0, status: changed ? 'changed' : 'unchanged', currentValue: changed ? '$19/user/month' : null, evidence: [1], note: changed ? 'Price raised' : null }],
-        news: changed ? [{ summary: 'Pipedrive launched an AI sales assistant', evidence: [1] }] : [],
+      // One batched judge call: answer each "## i. Entity: X" section.
+      const entities = [...p.matchAll(/## (\d+)\. Entity: (.+)/g)].map(([, i, name]) => {
+        const changed = name.trim() === 'Pipedrive';
+        return {
+          entity: Number(i),
+          claims: [{ index: 0, status: changed ? 'changed' : 'unchanged', currentValue: changed ? '$19/user/month' : null, evidence: [1], note: changed ? 'Price raised' : null }],
+          news: changed ? [{ summary: 'Pipedrive launched an AI sales assistant', evidence: [1] }] : [],
+        };
       });
+      return generated({ entities });
     }
     return generated({
       facts: ['User has a 20-person sales team', 'Shortlisted CRMs: HubSpot, Pipedrive'],

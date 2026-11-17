@@ -103,6 +103,22 @@ let active = 0;
 const CONCURRENCY = 3;
 
 /** Start the in-process worker. Jobs left 'running' by a crash are put back in the queue. */
+/**
+ * Chat turns in progress. The worker starts no new jobs while one runs: the
+ * API key's capacity is shared, and background extraction was measured
+ * pushing the router past its timeout. Jobs catch up between turns.
+ */
+let foreground = 0;
+
+export async function inForeground<T>(fn: () => Promise<T>): Promise<T> {
+  foreground++;
+  try {
+    return await fn();
+  } finally {
+    foreground--;
+  }
+}
+
 export function startWorker() {
   if (running) return;
   running = true;
@@ -110,7 +126,7 @@ export function startWorker() {
   if (reset.changes) log.info({ jobs: reset.changes }, 'resuming jobs interrupted by a restart');
   const tick = () => {
     if (!running) return;
-    while (active < CONCURRENCY) {
+    while (foreground === 0 && active < CONCURRENCY) {
       const job = claimNext();
       if (!job) break;
       active++;

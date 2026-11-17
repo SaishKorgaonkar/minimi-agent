@@ -13,7 +13,8 @@ import type { Evidence } from '../search/types.js';
 import { isoDay } from '../time/tz.js';
 
 /**
- * Re-check stored claims against today's web. For each entity, in parallel:
+ * Re-check stored claims against today's web. For each entity (gathered in
+ * parallel, then judged together in one call):
  *
  *  1. Re-fetch the page the claim came from and compare it with the snapshot
  *     taken when the claim was made. Same hash → unchanged, no LLM needed.
@@ -42,24 +43,35 @@ export interface EntityReport {
   news: { summary: string; evidence: number[] }[];
 }
 
+const verdictSchema = z.object({
+  index: z.number().describe('Index of the claim within its entity'),
+  status: z.enum(['changed', 'unchanged', 'unverified']).describe(
+    'changed: the new evidence clearly shows a different current value. unchanged: the evidence clearly shows the same value. unverified: the evidence does not settle it.',
+  ),
+  currentValue: z.string().nullable().describe('The current value if the evidence shows it'),
+  evidence: z.array(z.number()).describe('Source numbers [n] that support the verdict'),
+  note: z.string().nullable().describe('One short sentence, e.g. "Plan renamed from Pro to Scale"'),
+});
+
 const judgeSchema = z.object({
-  claims: z.array(z.object({
-    index: z.number().describe('Index of the claim in the list'),
-    status: z.enum(['changed', 'unchanged', 'unverified']).describe(
-      'changed: the new evidence clearly shows a different current value. unchanged: the evidence clearly shows the same value. unverified: the evidence does not settle it.',
-    ),
-    currentValue: z.string().nullable().describe('The current value if the evidence shows it'),
-    evidence: z.array(z.number()).describe('Source numbers [n] that support the verdict'),
-    note: z.string().nullable().describe('One short sentence, e.g. "Plan renamed from Pro to Scale"'),
+  entities: z.array(z.object({
+    entity: z.number().describe('Entity number from the ## heading'),
+    claims: z.array(verdictSchema),
+    news: z.array(z.object({
+      summary: z.string().describe('One sentence: a notable launch, pricing change, acquisition or shutdown since the date'),
+      evidence: z.array(z.number()),
+    })).describe('Only significant, dated news after the since-date. Empty if none.'),
   })),
-  news: z.array(z.object({
-    summary: z.string().describe('One sentence: a notable launch, pricing change, acquisition or shutdown since the date'),
-    evidence: z.array(z.number()),
-  })).describe('Only significant, dated news after the since-date. Empty if none.'),
 });
 
 const MAX_ENTITIES = 6;
 
+/**
+ * Re-check claims, grouped by vendor. Evidence is gathered for every vendor in
+ * parallel, then ONE judge call decides all of them: concurrent judge calls
+ * were measured being processed one at a time by the API (~3 s each), so five
+ * vendors took ~17 s; a single batched call takes a few seconds.
+ */
 export async function verifyClaims(
   claims: Claim[],
   since: Date,
@@ -67,24 +79,62 @@ export async function verifyClaims(
   onProgress?: (msg: string) => void,
   tz = config.timezone,
 ): Promise<EntityReport[]> {
+  // Group by vendor: "HubSpot Sales Hub Starter" and "HubSpot Sales Hub
+  // Professional" are one check, so five shortlisted CRMs are five groups.
   const byEntity = new Map<string, Claim[]>();
   for (const c of claims) {
-    const key = c.entity.trim().toLowerCase();
+    const key = vendorKey(c.entity);
     byEntity.set(key, [...(byEntity.get(key) ?? []), c]);
   }
-  const groups = [...byEntity.values()].slice(0, MAX_ENTITIES);
+  const groups = [...byEntity.values()].slice(0, MAX_ENTITIES).map((g) => g.slice(0, 8));
+  if (!groups.length) return [];
   onProgress?.(`Re-checking ${groups.length} ${groups.length === 1 ? 'item' : 'items'} against today's web`);
-  return Promise.all(groups.map((g) => verifyEntity(g.slice(0, 8), since, registry, tz)));
+
+  const checkedAt = nowMs();
+  const t0 = performance.now();
+  const gathered = await Promise.all(groups.map((g) => gather(g, since, registry, checkedAt)));
+  const gatheredMs = Math.round(performance.now() - t0);
+  await judge(gathered, since, registry, checkedAt, tz);
+  log.debug({ entities: gathered.length, gatheredMs, totalMs: Math.round(performance.now() - t0) }, 'claims verified');
+
+  return gathered.map((g) => {
+    record(g.results, registry, checkedAt);
+    return { entity: g.entity, claims: g.results, news: g.news };
+  });
 }
 
-async function verifyEntity(claims: Claim[], since: Date, registry: SourceRegistry, tz: string): Promise<EntityReport> {
-  const entity = claims[0].entity;
-  const attributes = [...new Set(claims.map((c) => c.attribute))].slice(0, 3).join(', ');
-  const checkedAt = nowMs();
+export function vendorKey(entity: string): string {
+  return entity.trim().toLowerCase().split(/\s+/)[0] ?? '';
+}
 
-  // 1 + 2 in parallel: re-fetch original sources, search for news since then.
+/** The shared leading words of a group's entity names: the vendor or product line. */
+export function groupLabel(entities: string[]): string {
+  const split = entities.map((e) => e.trim().split(/\s+/));
+  const out: string[] = [];
+  for (let i = 0; i < split[0].length; i++) {
+    const w = split[0][i];
+    if (!split.every((s) => s[i]?.toLowerCase() === w.toLowerCase())) break;
+    out.push(w);
+  }
+  return out.join(' ') || split[0][0];
+}
+
+interface Gathered {
+  entity: string;
+  results: VerifiedClaim[];
+  /** Claims the judge must decide (not settled by an identical page). */
+  needJudge: VerifiedClaim[];
+  evidence: Evidence[];
+  news: EntityReport['news'];
+}
+
+/** Re-fetch the claims' source pages and search for current state and news, in parallel. */
+async function gather(claims: Claim[], since: Date, registry: SourceRegistry, checkedAt: number): Promise<Gathered> {
+  const entity = groupLabel([...new Set(claims.map((c) => c.entity))]);
+  const attributes = [...new Set(claims.map((c) => c.attribute))].slice(0, 3).join(', ');
   const urls = [...new Set(claims.map((c) => c.source_url).filter((u): u is string => !!u))].slice(0, 2);
-  const [pages, news] = await Promise.all([
+
+  const [pages, found] = await Promise.all([
     Promise.all(urls.map(async (url) => {
       const page = await fetchPage(url);
       const claimTime = Math.min(...claims.filter((c) => c.source_url === url).map((c) => c.checked_at));
@@ -93,20 +143,18 @@ async function verifyEntity(claims: Claim[], since: Date, registry: SourceRegist
       if (page) insertSnapshot({ url, fetched_at: checkedAt, content_hash: page.hash, title: page.title, text: page.text });
       return { url, page, sameAsBefore: !!(page && before && before.content_hash === page.hash) };
     })),
-    webSearch({
-      queries: [`${entity} ${attributes}`, `${entity} news announcement`],
-      after: since,
-      maxResults: 5,
-      fresh: true,
-    }, registry).catch((err) => {
+    // Current state (no date filter: pricing pages rarely carry a new publish
+    // date) and news since the earlier answer.
+    Promise.all([
+      webSearch({ queries: [`${entity} ${claims[0].attribute}`], maxResults: 3, deadlineMs: config.search.verifyTimeoutMs }, registry),
+      webSearch({ queries: [`${entity} news announcement`], after: since, topic: 'news', maxResults: 3, deadlineMs: config.search.verifyTimeoutMs }, registry),
+    ]).then(([current, recent]) => [...current.evidence, ...recent.evidence]).catch((err) => {
       log.warn({ err: String(err), entity }, 'verification search failed');
-      return { evidence: [] as Evidence[], stats: null };
+      return [] as Evidence[];
     }),
   ]);
 
-  // Fast path: every claim's source page is byte-for-byte (normalised) the same.
-  const unchangedUrls = new Set(pages.filter((p) => p.sameAsBefore).map((p) => p.url));
-  const evidence: Evidence[] = [...news.evidence];
+  const evidence: Evidence[] = [...found];
   for (const p of pages) {
     if (!p.page) continue;
     evidence.unshift(registry.add({
@@ -116,51 +164,68 @@ async function verifyEntity(claims: Claim[], since: Date, registry: SourceRegist
     }));
   }
 
+  // Fast path: a claim whose source page is (normalised) identical needs no judge.
+  const unchangedUrls = new Set(pages.filter((p) => p.sameAsBefore).map((p) => p.url));
   const results: VerifiedClaim[] = claims.map((claim) => ({ claim, status: 'unverified', newValue: null, evidence: [], note: null }));
   const needJudge = results.filter((r) => !(r.claim.source_url && unchangedUrls.has(r.claim.source_url)));
   for (const r of results) {
-    if (!needJudge.includes(r)) {
-      r.status = 'unchanged';
-      r.note = 'Source page identical to when this was first answered';
-      const ev = evidence.find((e) => e.url === r.claim.source_url);
-      if (ev) r.evidence = [ev.n];
-    }
+    if (needJudge.includes(r)) continue;
+    r.status = 'unchanged';
+    r.note = 'Source page identical to when this was first answered';
+    const ev = evidence.find((e) => e.url === r.claim.source_url);
+    if (ev) r.evidence = [ev.n];
   }
+  return { entity, results, needJudge, evidence: dedupe(evidence), news: [] };
+}
 
-  let newsItems: EntityReport['news'] = [];
-  if (evidence.length) {
-    try {
-      const list = needJudge.map((r, i) =>
-        `${i}. ${r.claim.attribute}: "${r.claim.value}" (stated ${isoDay(new Date(r.claim.checked_at), tz)}${r.claim.source_url ? `, source ${r.claim.source_url}` : ''})`).join('\n');
-      const { output } = await withOptionsFallback('extract', (providerOptions) =>
-        generateText({
-          model: models.extract(),
-          providerOptions,
-          output: Output.object({ schema: judgeSchema }),
-          instructions:
-            'You check whether earlier statements about a product are still true, using only the evidence given. ' +
-            'Be conservative: mark "changed" only when the evidence clearly shows a different current value, ' +
-            '"unchanged" only when it clearly shows the same one, otherwise "unverified". Never use outside knowledge.',
-          prompt:
-            `Entity: ${entity}\nSince: ${isoDay(since, tz)}\nToday: ${isoDay(new Date(checkedAt), tz)}\n\n` +
-            `EARLIER CLAIMS:\n${list || '(none to judge)'}\n\nEVIDENCE:\n${formatEvidence(evidence)}`,
-        }),
-      );
-      for (const v of output?.claims ?? []) {
-        const r = needJudge[v.index];
+function dedupe(evidence: Evidence[]): Evidence[] {
+  const seen = new Set<number>();
+  return evidence.filter((e) => !seen.has(e.n) && seen.add(e.n));
+}
+
+/** One structured call decides every entity's open claims and notable news. */
+async function judge(groups: Gathered[], since: Date, registry: SourceRegistry, checkedAt: number, tz: string) {
+  const open = groups.map((g, i) => ({ g, i })).filter(({ g }) => g.evidence.length);
+  if (!open.length) return;
+  const sections = open.map(({ g, i }) => {
+    const list = g.needJudge.map((r, k) =>
+      `${k}. ${r.claim.attribute}: "${r.claim.value}" (stated ${isoDay(new Date(r.claim.checked_at), tz)}${r.claim.source_url ? `, source ${r.claim.source_url}` : ''})`).join('\n');
+    return `## ${i}. Entity: ${g.entity}\nEARLIER CLAIMS:\n${list || '(none to judge; only report news)'}\n\nEVIDENCE:\n${formatEvidence(g.evidence)}`;
+  });
+  try {
+    const { output } = await withOptionsFallback('judge', (providerOptions) =>
+      generateText({
+        model: models.judge(),
+        providerOptions,
+        output: Output.object({ schema: judgeSchema }),
+        instructions:
+          'You check whether earlier statements about products are still true, using only the evidence listed under each entity. ' +
+          'Be conservative: mark "changed" only when the evidence clearly shows a different current value, ' +
+          '"unchanged" only when it clearly shows the same one, otherwise "unverified". Never use outside knowledge. ' +
+          'Return one entry per entity, using its number from the ## heading.',
+        prompt: `Since: ${isoDay(since, tz)}\nToday: ${isoDay(new Date(checkedAt), tz)}\n\n${sections.join('\n\n')}`,
+      }),
+    );
+    for (const e of output?.entities ?? []) {
+      const g = groups[e.entity];
+      if (!g) continue;
+      for (const v of e.claims) {
+        const r = g.needJudge[v.index];
         if (!r) continue;
         r.status = v.status;
         r.newValue = v.status === 'changed' ? v.currentValue : null;
         r.evidence = v.evidence.filter((n) => registry.get(n));
         r.note = v.note;
       }
-      newsItems = (output?.news ?? []).slice(0, 3).map((n) => ({ summary: n.summary, evidence: n.evidence.filter((x) => registry.get(x)) }));
-    } catch (err) {
-      log.warn({ err: String(err), entity }, 'verification judge failed; claims stay unverified');
+      g.news = e.news.slice(0, 3).map((n) => ({ summary: n.summary, evidence: n.evidence.filter((x) => registry.get(x)) }));
     }
+  } catch (err) {
+    log.warn({ err: String(err) }, 'verification judge failed; claims stay unverified');
   }
+}
 
-  // Record every outcome; version changed claims.
+/** Record every outcome; a changed claim gets a new version and the old one is superseded. */
+function record(results: VerifiedClaim[], registry: SourceRegistry, checkedAt: number) {
   for (const r of results) {
     const ev = r.evidence.map((n) => registry.get(n)).filter(Boolean).map((e) => ({ url: e!.url, title: e!.title }));
     insertVerification({ claimId: r.claim.id, status: r.status, newValue: r.newValue, evidence: ev, note: r.note, checkedAt });
@@ -172,7 +237,6 @@ async function verifyEntity(claims: Claim[], since: Date, registry: SourceRegist
       supersedeClaim(r.claim.id, newId);
     }
   }
-  return { entity, claims: results, news: newsItems };
 }
 
 /** How a verification report is shown to the answer model. */

@@ -76,19 +76,8 @@ export function resolveDateRange(message: string, now: Date, tz: string): DateRa
     return spanRange(from, addLocalDays(today, 1), tz, m[0], 'month', monthLabel(from));
   }
 
-  // 3. Weekdays: the most recent past occurrence. Naming today's weekday ("on Monday",
-  //    said on a Monday) means a week ago: people say "today" for today. "this Monday" = today.
-  if ((m = msg.match(WEEKDAY_RE))) {
-    const word = m[2].toLowerCase();
-    const target = WEEKDAYS.includes(word) ? WEEKDAYS.indexOf(word) : SHORT[word];
-    if (target !== undefined) {
-      let back = (today.weekday - target + 7) % 7;
-      if (back === 0 && !(m[1] && /^this$/i.test(m[1]))) back = 7;
-      return dayRange(addLocalDays(today, -back), tz, m[0]);
-    }
-  }
-
-  // 4. Absolute dates ("3 November", "Nov 3rd", "2026-11-03") via chrono.
+  // 3. Absolute dates ("3 November", "Nov 3rd", "2026-11-03") via chrono. Before weekdays:
+  //    in "Tue, 3 Nov" the date wins. Bare weekdays have no certain month, so chrono skips them.
   const offset = tzOffsetMinutes(now, tz);
   const results = chrono.parse(message, { instant: now, timezone: offset });
   for (const r of results) {
@@ -115,6 +104,18 @@ export function resolveDateRange(message: string, now: Date, tz: string): DateRa
       return spanRange(from, addLocalDays(e, 1), tz, r.text, 'span', r.text);
     }
     return dayRange({ year, month, day, weekday: 0 }, tz, r.text);
+  }
+
+  // 4. Weekdays: the most recent past occurrence. Naming today's weekday ("on Monday",
+  //    said on a Monday) means a week ago: people say "today" for today. "this Monday" = today.
+  if ((m = msg.match(WEEKDAY_RE))) {
+    const word = m[2].toLowerCase();
+    const target = WEEKDAYS.includes(word) ? WEEKDAYS.indexOf(word) : SHORT[word];
+    if (target !== undefined) {
+      let back = (today.weekday - target + 7) % 7;
+      if (back === 0 && !(m[1] && /^this$/i.test(m[1]))) back = 7;
+      return dayRange(addLocalDays(today, -back), tz, m[0]);
+    }
   }
 
   // 5. "Today" last: "on 3 November… is it still correct today?" refers to 3 November.

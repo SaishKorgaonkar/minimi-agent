@@ -20,8 +20,11 @@ async function postJson(url: string, body: unknown, headers: Record<string, stri
 
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 
+// Measured on free-tier keys: Exa serves ~4 requests at once (429s past ~10),
+// Tavily effectively one at a time at 1.5-2 s each. Queue rather than flood.
 export const exa: SearchProvider = {
   name: 'exa',
+  maxConcurrent: Number(process.env.EXA_CONCURRENCY ?? 4),
   async search(q: SearchQuery, signal) {
     const body: Record<string, unknown> = {
       query: q.query,
@@ -30,7 +33,8 @@ export const exa: SearchProvider = {
       contents: {
         text: { maxCharacters: 4000 },
         highlights: { maxCharacters: 1200, query: q.query },
-        ...(q.fresh ? { maxAgeHours: 24 } : {}),
+        // Exa's lite type rejects maxAgeHours (400). Freshness then comes from re-fetching the page ourselves.
+        ...(q.fresh && config.search.exaType !== 'lite' ? { maxAgeHours: 24 } : {}),
       },
     };
     if (q.topic === 'news') body.category = 'news';
@@ -51,6 +55,7 @@ export const exa: SearchProvider = {
 
 export const tavily: SearchProvider = {
   name: 'tavily',
+  maxConcurrent: Number(process.env.TAVILY_CONCURRENCY ?? 2),
   async search(q, signal) {
     const body: Record<string, unknown> = {
       query: q.query,
@@ -76,6 +81,7 @@ export const tavily: SearchProvider = {
 
 export const brave: SearchProvider = {
   name: 'brave',
+  maxConcurrent: Number(process.env.BRAVE_CONCURRENCY ?? 1),
   async search(q, signal) {
     const params = new URLSearchParams({
       q: q.query,

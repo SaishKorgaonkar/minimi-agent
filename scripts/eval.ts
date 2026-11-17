@@ -31,6 +31,7 @@ const { generateText, Output } = await import('ai');
 const { z } = await import('zod');
 const { seedHistory } = await import('./history.js');
 const { formatDay } = await import('../src/time/tz.js');
+const { getTurn } = await import('../src/db/repo.js');
 
 const problems = assertConfig();
 if (problems.length) {
@@ -123,8 +124,14 @@ for (const t of history) {
     if (e.type === 'meta') conversationId = e.conversationId;
   }));
   if (conversationId) threads.set(t.thread, conversationId);
-  reference.push(`[${formatDay(t.at, tz, true)}] USER: ${t.message}\nASSISTANT: ${r.text.slice(0, 1500)}`);
+  reference.push(`[${formatDay(t.at, tz, true)}] USER: ${t.message}\nASSISTANT: ${r.text.slice(0, 4000)}`);
   await drain();
+}
+
+function sourceList(turnId: string | null): string {
+  const raw = turnId ? getTurn(turnId)?.sources : null;
+  const sources = raw ? (JSON.parse(raw) as { n: number; title: string; url: string; publishedAt: string | null }[]) : [];
+  return sources.map((s) => `[${s.n}] ${s.title} (${s.publishedAt?.slice(0, 10) ?? 'undated'}) ${s.url}`).join('\n') || '(none)';
 }
 
 const judgeSchema = z.object({ pass: z.boolean(), score: z.number().describe('0 to 1'), reason: z.string() });
@@ -135,6 +142,9 @@ const evalConversation = { id: undefined as string | undefined };
 
 console.log(`Running ${cases.length} cases…\n`);
 for (const c of cases) {
+  // Pace like a person: background jobs from the previous answer finish while
+  // they read it. BACK_TO_BACK=1 skips this to measure the worst case.
+  if (!process.env.BACK_TO_BACK) await drain();
   const t0 = performance.now();
   let firstToken: number | null = null;
   let intent = '?';
@@ -180,7 +190,7 @@ for (const c of cases) {
     providerOptions,
     output: Output.object({ schema: judgeSchema }),
     instructions: 'You grade a chat assistant. Use the rubric and the reference conversation history. Be strict but fair. Do not reward length.',
-    prompt: `REFERENCE HISTORY:\n${reference.join('\n\n')}\n\nQUESTION (asked ${formatDay(now(), tz, true)}):\n${c.question}\n\nANSWER:\n${result.text}\n\nRUBRIC:\n${c.rubric}`,
+    prompt: `REFERENCE HISTORY:\n${reference.join('\n\n')}\n\nQUESTION (asked ${formatDay(now(), tz, true)}):\n${c.question}\n\nANSWER:\n${result.text}\n\nSOURCES SHOWN WITH THE ANSWER (what the [n] citations link to):\n${sourceList(result.turnId)}\n\nRUBRIC:\n${c.rubric}`,
   }));
   const judge = output ?? { pass: false, score: 0, reason: 'judge failed' };
   rows.push({ ability: c.ability, question: c.question, intent, checks, checksPass: ok, judge, firstTokenMs: firstToken, totalMs });

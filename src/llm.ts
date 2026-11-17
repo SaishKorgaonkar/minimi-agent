@@ -9,11 +9,11 @@ import { log } from './log.js';
  */
 const openai = createOpenAI({ apiKey: config.keys.openai });
 
-export type ModelRole = 'answer' | 'router' | 'extract';
+export type ModelRole = 'answer' | 'router' | 'extract' | 'judge';
 
 /** Test seam: tests swap in mock models; production never sets these. */
 const overrides: Partial<Record<ModelRole | 'embed', unknown>> = {};
-export function setTestModels(m: Partial<{ answer: LanguageModel; router: LanguageModel; extract: LanguageModel; embed: EmbeddingModel }>) {
+export function setTestModels(m: Partial<{ answer: LanguageModel; router: LanguageModel; extract: LanguageModel; judge: LanguageModel; embed: EmbeddingModel }>) {
   Object.assign(overrides, m);
 }
 
@@ -21,18 +21,28 @@ export const models = {
   answer: () => (overrides.answer as LanguageModel) ?? openai(config.models.answer),
   router: () => (overrides.router as LanguageModel) ?? openai(config.models.router),
   extract: () => (overrides.extract as LanguageModel) ?? openai(config.models.extract),
+  /** Re-verification judge: same model as extraction, no reasoning (it compares values in given evidence). */
+  judge: () => (overrides.judge as LanguageModel) ?? (overrides.extract as LanguageModel) ?? openai(config.models.judge),
 };
 
 /**
- * Low reasoning effort on every path by default: routing and extraction are
- * classification, and the answer model works from evidence we already gathered.
+ * Reasoning effort per role. Routing is classification, so it runs with none
+ * (measured: ~1.5 s vs ~3.8 s at low on gpt-6-luna). Sol's minimum is low.
+ * The verification judge compares values in given evidence, so none as well.
+ * REASONING_EFFORT_<ROLE> or REASONING_EFFORT overrides; 'off' sends nothing.
  * If a model rejects these options, we drop them for that role and retry once.
  */
-const effort = (process.env.REASONING_EFFORT ?? 'low') as 'none' | 'low' | 'medium' | 'high';
+type Effort = 'none' | 'low' | 'medium' | 'high';
+const defaultEffort: Record<ModelRole, Effort> = { router: 'none', judge: 'none', extract: 'low', answer: 'low' };
 const optionsDisabled = new Set<ModelRole>();
 
+function effortFor(role: ModelRole): Effort | 'off' {
+  return (process.env[`REASONING_EFFORT_${role.toUpperCase()}`] ?? process.env.REASONING_EFFORT ?? defaultEffort[role]) as Effort | 'off';
+}
+
 export function providerOptions(role: ModelRole) {
-  if (optionsDisabled.has(role) || process.env.REASONING_EFFORT === 'off') return undefined;
+  const effort = effortFor(role);
+  if (optionsDisabled.has(role) || effort === 'off') return undefined;
   return role === 'answer'
     ? { openai: { reasoningEffort: effort, textVerbosity: 'medium' as const } }
     : { openai: { reasoningEffort: effort } };

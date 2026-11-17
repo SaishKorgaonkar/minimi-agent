@@ -23,15 +23,20 @@ export const config = {
     router: process.env.MODEL_ROUTER ?? 'gpt-6-luna',
     /** Background extraction and claim verification: structured output. */
     extract: process.env.MODEL_EXTRACT ?? 'gpt-6.1-terra',
+    judge: process.env.MODEL_JUDGE ?? process.env.MODEL_EXTRACT ?? 'gpt-6.1-terra',
     embed: process.env.MODEL_EMBED ?? 'text-embedding-3-small',
   },
   embedDims: 1536,
 
   search: {
     /** Wait at most this long for providers; use whatever has arrived. */
-    providerTimeoutMs: num('SEARCH_TIMEOUT_MS', 1800),
+    providerTimeoutMs: num('SEARCH_TIMEOUT_MS', 2500),
+    /** After every query has an answer from some provider, wait this long for the rest. */
+    graceMs: num('SEARCH_GRACE_MS', 400),
+    /** Re-verification queues many searches at once and shows progress, so it gets longer. */
+    verifyTimeoutMs: num('VERIFY_SEARCH_TIMEOUT_MS', 5000),
     /** Per-page fetch timeout. */
-    fetchTimeoutMs: num('FETCH_TIMEOUT_MS', 2500),
+    fetchTimeoutMs: num('FETCH_TIMEOUT_MS', 1500),
     resultsPerProvider: 6,
     /** Results handed to the model per search. */
     maxResults: 8,
@@ -44,7 +49,7 @@ export const config = {
     /** Model steps in the answer loop (each tool call + final answer counts). */
     maxSteps: 4,
     recentTurns: 8,
-    routerTimeoutMs: num('ROUTER_TIMEOUT_MS', 2500),
+    routerTimeoutMs: num('ROUTER_TIMEOUT_MS', 3000),
   },
 
   jobs: {
