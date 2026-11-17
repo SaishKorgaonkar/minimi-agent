@@ -3,6 +3,10 @@
 A chat agent with one tool, web search. It answers with citations, remembers
 what you asked and **when**, and can check whether an old answer is still true.
 
+[![Watch the demo: recalling 3 November and re-checking the answer](docs/demo-thumbnail.jpg)](https://drive.google.com/file/d/1omuEcB8VQew06OAt04g_9nYNaWAqLAw7/view?usp=sharing)
+
+▶ **[Watch the 2-minute demo](https://drive.google.com/file/d/1omuEcB8VQew06OAt04g_9nYNaWAqLAw7/view?usp=sharing)**: recall by date, re-checking an old answer against today's web, local prices, and how it works.
+
 > "Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?"
 
 works because "last Tuesday" is resolved to an exact date range in code, that
